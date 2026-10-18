@@ -356,7 +356,7 @@ const I18N = {
     pickPart:"部位を選んでください", allParts:"‹ 部位一覧", exN:"{n}種目", cardioDone:"{name} {t} を記録しました", cardioHint:"終わったらストップで時間を記録します",
     nearHead:"現在地の近くのジム", nearSearching:"現在地から探しています…", nearNone:"現在地は取得できました（誤差 約{acc}m）が、地図データ（OpenStreetMap）の半径3km以内にジムが登録されていませんでした。下に名前を入力して登録できます。",
     nearDenied:"位置情報が使えません。iPhoneの「設定」→「プライバシーとセキュリティ」→「位置情報サービス」で、Safariを「使用中のみ許可」にしてください。",
-    nearErr:"地図データを取得できませんでした。電波の良い場所で「もう一度探す」を押してください。", nearLocating:"① 現在地を取得しています…（許可を求める表示が出たら「許可」を押してください）", nearQuerying:"② 現在地を取得しました（誤差 約{acc}m）。近くのジムを検索しています…", nearSlow:"地図データのサーバーから返事がありませんでした。少し待って「もう一度探す」を押してください。", nearNoPos:"現在地を取得できませんでした。屋内で電波が弱いと失敗することがあります。「もう一度探す」を押してください。", nearMaps:"Googleマップで近くのジムを見る", nearRetry:"もう一度探す", savedHead:"登録済みのジム", typeHead:"見つからないときは名前を入力",
+    nearErr:"地図データのサーバーが混み合っていて検索できませんでした。少し時間をおいて「もう一度探す」を押してください。", nearLocating:"① 現在地を取得しています…（許可を求める表示が出たら「許可」を押してください）", nearQuerying:"② 現在地を取得しました（誤差 約{acc}m）。近くのジムを検索しています…", nearSlow:"地図データのサーバーから返事がありませんでした。少し待って「もう一度探す」を押してください。", nearNoPos:"現在地を取得できませんでした。屋内で電波が弱いと失敗することがあります。「もう一度探す」を押してください。", nearMaps:"Googleマップで近くのジムを見る", nearRetry:"もう一度探す", savedHead:"登録済みのジム", typeHead:"見つからないときは名前を入力",
     gymQ:"どこのジムにいますか？", gymNew:"新しいジムを登録", gymNamePh:"ここに貼り付け、または名前を入力", gymSkip:"あとで", gymMap:"Googleマップで近くのジムを探す",
     gymMapNote:"地図でジムを開き「共有」→「コピー」して、下の欄に貼り付けるとジム名が自動で入ります。登録したジムは次回から候補に出ます。", gymReg:"登録して選ぶ", gymSel:"「{name}」で記録します", gymChange:"変更",
     gymNone:"ジム未選択", gyms:"ジム", gymsNote:"よく行くジムが上に並びます。", visitsN:"{n}回",
@@ -413,7 +413,7 @@ const I18N = {
     pickPart:"Choose a body part", allParts:"‹ Body parts", exN:"{n} exercises", cardioDone:"Logged {name} {t}", cardioHint:"Press Stop when done to log the time",
     nearHead:"Gyms near you", nearSearching:"Searching around your location…", nearNone:"Got your location (within about {acc} m), but the map data (OpenStreetMap) has no gyms within 3 km. You can type a name below.",
     nearDenied:"Location is unavailable. Allow Safari in Settings → Privacy & Security → Location Services.",
-    nearErr:"Couldn't load map data. Try again where you have signal.", nearLocating:"1) Getting your location… (tap Allow if asked)", nearQuerying:"2) Got your location (within about {acc} m). Searching for gyms…", nearSlow:"The map data server did not answer. Wait a moment and press Search again.", nearNoPos:"Couldn't get your location. This can fail indoors with weak signal; press Search again.", nearMaps:"See nearby gyms in Google Maps", nearRetry:"Search again", savedHead:"Saved gyms", typeHead:"Not listed? Type the name",
+    nearErr:"The map data servers are busy. Wait a moment and press Search again.", nearLocating:"1) Getting your location… (tap Allow if asked)", nearQuerying:"2) Got your location (within about {acc} m). Searching for gyms…", nearSlow:"The map data server did not answer. Wait a moment and press Search again.", nearNoPos:"Couldn't get your location. This can fail indoors with weak signal; press Search again.", nearMaps:"See nearby gyms in Google Maps", nearRetry:"Search again", savedHead:"Saved gyms", typeHead:"Not listed? Type the name",
     gymQ:"Which gym are you at?", gymNew:"Add a new gym", gymNamePh:"Paste here or type a name", gymSkip:"Later", gymMap:"Find nearby gyms in Google Maps",
     gymMapNote:"Open the gym in Maps, tap Share → Copy, and paste it below; the gym name fills in automatically. Saved gyms appear as choices next time.", gymReg:"Add and select", gymSel:"Logging at “{name}”", gymChange:"Change",
     gymNone:"No gym selected", gyms:"Gyms", gymsNote:"Your most visited gyms come first.", visitsN:"{n} visits",
@@ -552,7 +552,7 @@ function getPos(){
 // gyms are tagged inconsistently in OpenStreetMap (especially in Japan), so match tags and common names; ask all servers at once
 async function overpass(lat, lon){
   const a=`(around:3000,${lat},${lon})`;
-  const q = `[out:json][timeout:25];(nwr["leisure"="fitness_centre"]${a};nwr["amenity"="gym"]${a};nwr["leisure"="sports_centre"]["name"]${a};nwr["sport"="fitness"]["name"]${a};nwr["name"~"ジム|フィットネス|エニタイム|チョコザップ|chocoZAP|カーブス|ティップネス|ルネサンス|JOYFIT|[Gg][Yy][Mm]|[Ff]itness|FITNESS"]${a};);out center 80;`;
+  const q = `[out:json][timeout:15];(nwr["leisure"="fitness_centre"]${a};nwr["amenity"="gym"]${a};nwr["leisure"="sports_centre"]["name"]${a};);out center 80;`;
   const hosts = ["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter","https://maps.mail.ru/osm/tools/overpass/api/interpreter","https://overpass.private.coffee/api/interpreter"];
   const one = h => new Promise((ok,ng)=>{ const ctl=new AbortController(); const tm=setTimeout(()=>ctl.abort(),30000);
     fetch(h, {method:"POST", body:"data="+encodeURIComponent(q), headers:{"Content-Type":"application/x-www-form-urlencoded"}, signal:ctl.signal})
@@ -560,6 +560,20 @@ async function overpass(lat, lon){
   return within(new Promise((ok,ng)=>{ let left=hosts.length, last; hosts.forEach(h=>one(h).then(ok, e=>{ last=e; if(--left===0) ng(last); })); }), 35000, {slow:true});
 }
 function mapsLink(lat, lon){ return `<a class="maplink" href="https://www.google.com/maps/search/${encodeURIComponent(isJa()?"ジム":"gym")}${lat!=null?`/@${lat},${lon},15z`:""}" target="_blank" rel="noopener">${t("nearMaps")}</a>`; }
+async function nominatim(lat, lon){
+  const d=0.03, vb=[lon-d,lat+d,lon+d,lat-d].join(","), out=[];
+  for(const q of ["ジム","フィットネス","gym"]){
+    try{ const r=await within(fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=20&bounded=1&viewbox=${vb}&accept-language=${isJa()?"ja":"en"}&q=${encodeURIComponent(q)}`),12000,new Error("timeout"));
+      if(r.ok) for(const x of await r.json()) out.push({lat:+x.lat, lon:+x.lon, tags:{name:x.name||String(x.display_name||"").split(",")[0]}}); }catch(e){}
+  }
+  return out;
+}
+async function findGyms(lat, lon){
+  const [o, n] = await Promise.allSettled([overpass(lat, lon), nominatim(lat, lon)]);
+  const all = [...(o.status==="fulfilled"?o.value:[]), ...(n.status==="fulfilled"?n.value:[])];
+  if(!all.length && o.status==="rejected") throw o.reason;
+  return all;
+}
 async function showNearby(force){
   const box = () => sheet.querySelector("#nearList");
   const paint = html => { const b=box(); if(b) b.innerHTML=html; };
@@ -571,7 +585,7 @@ async function showNearby(force){
       const c = await getPos(); lat=c.latitude; lon=c.longitude; var acc=Math.round(c.accuracy||0);
       paint(`<div class="note" style="margin:0">${t("nearQuerying",{acc})}</div>`);
       const seen = new Set();
-      items = (await overpass(lat, lon)).map(e=>{ const tg=e.tags||{}; const la=e.lat??e.center?.lat, lo=e.lon??e.center?.lon;
+      items = (await findGyms(lat, lon)).map(e=>{ const tg=e.tags||{}; const la=e.lat??e.center?.lat, lo=e.lon??e.center?.lon;
           const name=(isJa()? tg["name:ja"]||tg.name : tg["name:en"]||tg.name)||""; const br=tg["branch:ja"]||tg.branch||"";
           return {name: br && !name.includes(br) ? name+" "+br : name, lat:la, lon:lo}; })
         .filter(x=>x.name && x.lat!=null && !seen.has(x.name) && seen.add(x.name))
