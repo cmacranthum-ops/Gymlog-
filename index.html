@@ -178,6 +178,28 @@ body.ph-rest .pill{background:#1d4ed8;border-color:#93b4ff}
 .vrow{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin:0 0 8px}
 .vrow b{color:var(--ink);font-size:16px}
 .calok{font-size:12px;font-weight:700;color:var(--ok)}
+.bwin{width:110px;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 10px;font-size:26px;font-weight:700;text-align:center}
+.chart{width:100%;height:auto;display:block;margin-top:4px;overflow:visible}
+.chart .gl{stroke:var(--line);stroke-width:1}
+.chart .ya,.chart .xa{fill:var(--muted);font-size:10px;font-family:var(--num)}
+.chart .ya{text-anchor:end}
+.chart .xa{text-anchor:middle}
+.chart .col{fill:var(--violet)}
+.chart .col.on{fill:var(--violet-hi)}
+.chart .ln{fill:none;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.chart .ln.a{stroke:var(--violet-hi)}
+.chart .ln.b{stroke:var(--pink);stroke-dasharray:5 4;opacity:.85}
+.chart .dot.a{fill:var(--violet-hi)}
+.chart .dot.b{fill:var(--pink)}
+.chart .dot.on{stroke:#fff;stroke-width:2}
+.tip{min-height:20px;font-size:14px;font-weight:700;margin-top:4px}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:3px}
+.hb{display:grid;grid-template-columns:5.5em minmax(0,1fr) 2.5em;align-items:center;gap:8px;font-size:13px;margin:8px 0}
+.hbt{height:12px;background:var(--surface2);border-radius:6px;overflow:hidden}
+.hbt i{display:block;height:100%;background:var(--violet);border-radius:6px}
+.hb b{font-family:var(--num);font-size:17px;text-align:right}
+.exsel{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:10px;font-size:16px;font-weight:600;margin-bottom:6px}
 .mgr{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)}
 .mgr:last-child{border-bottom:0}
 .mgr .nm{flex:1;min-width:0}
@@ -337,7 +359,15 @@ const I18N = {
     nearErr:"地図データを取得できませんでした。電波の良い場所で「もう一度探す」を押してください。", nearRetry:"もう一度探す", savedHead:"登録済みのジム", typeHead:"見つからないときは名前を入力",
     gymQ:"どこのジムにいますか？", gymNew:"新しいジムを登録", gymNamePh:"ここに貼り付け、または名前を入力", gymSkip:"あとで", gymMap:"Googleマップで近くのジムを探す",
     gymMapNote:"地図でジムを開き「共有」→「コピー」して、下の欄に貼り付けるとジム名が自動で入ります。登録したジムは次回から候補に出ます。", gymReg:"登録して選ぶ", gymSel:"「{name}」で記録します", gymChange:"変更",
-    gymNone:"ジム未選択", gyms:"ジム", gymsNote:"よく行くジムが上に並びます。", visitsN:"{n}回"
+    gymNone:"ジム未選択", gyms:"ジム", gymsNote:"よく行くジムが上に並びます。", visitsN:"{n}回",
+    kcal:"約{k}kcal", bwHead:"体重（消費カロリーの計算用）", bwUnset:"未設定のため65kgで計算しています",
+    bwNote:"消費カロリーは「METs × 体重 × 時間」で出した推定値です。筋トレはジム滞在時間から有酸素の時間を除いた分を3.5 METs、有酸素はマシンごとの値（トレッドミル6.0、エアロバイク7.0、クロストレーナー5.0、ローイング7.0、ステアクライマー9.0）で計算します。強度や体格で実際とは変わるので目安としてご覧ください。",
+    hList:"一覧", hChart:"グラフ", p30:"1か月", p90:"3か月", p365:"1年", pAll:"全期間",
+    mEx:"種目の重量", mVol:"総挙上量", mKcal:"消費カロリー", mStay:"滞在時間", mVisits:"ジム回数", mParts:"部位別セット", mCardio:"有酸素",
+    maxW:"最高重量", e1rm:"推定1RM", cMin:"分", noData:"この期間の記録はありません", tapHint:"棒や点をタップすると数値が出ます",
+    sumTotal:"期間合計 {v}", sumAvg:"1回平均 {v}", sumVisits:"期間 {n}回 · 週平均 {w}回", sumBest:"最高 {w}kg · 推定1RM 最高 {r}kg",
+    e1rmNote:"推定1RMはEpley式（重量×(1+回数/30)）で、その日のいちばん良いセットから計算しています。", perDay:"日ごと", perWeek:"週ごと（月曜はじまり）", perMonth:"月ごと",
+    weekOf:"{d}の週"
   },
   en: {
     tabEx:"Exercises", tabHist:"History", tabSet:"Settings",
@@ -386,7 +416,15 @@ const I18N = {
     nearErr:"Couldn't load map data. Try again where you have signal.", nearRetry:"Search again", savedHead:"Saved gyms", typeHead:"Not listed? Type the name",
     gymQ:"Which gym are you at?", gymNew:"Add a new gym", gymNamePh:"Paste here or type a name", gymSkip:"Later", gymMap:"Find nearby gyms in Google Maps",
     gymMapNote:"Open the gym in Maps, tap Share → Copy, and paste it below; the gym name fills in automatically. Saved gyms appear as choices next time.", gymReg:"Add and select", gymSel:"Logging at “{name}”", gymChange:"Change",
-    gymNone:"No gym selected", gyms:"Gyms", gymsNote:"Your most visited gyms come first.", visitsN:"{n} visits"
+    gymNone:"No gym selected", gyms:"Gyms", gymsNote:"Your most visited gyms come first.", visitsN:"{n} visits",
+    kcal:"~{k} kcal", bwHead:"Body weight (for calories)", bwUnset:"Not set, so 65 kg is used",
+    bwNote:"Calories are estimates from METs × body weight × time. Strength work is your gym time minus cardio at 3.5 METs; cardio uses a value per machine (treadmill 6.0, bike 7.0, elliptical 5.0, rowing 7.0, stair climber 9.0). Intensity and build change the real number, so treat it as a guide.",
+    hList:"List", hChart:"Charts", p30:"1 month", p90:"3 months", p365:"1 year", pAll:"All time",
+    mEx:"Exercise weight", mVol:"Volume", mKcal:"Calories", mStay:"Gym time", mVisits:"Gym visits", mParts:"Sets by body part", mCardio:"Cardio",
+    maxW:"Top weight", e1rm:"Est. 1RM", cMin:"min", noData:"No records in this period", tapHint:"Tap a bar or point to see its value",
+    sumTotal:"Period total {v}", sumAvg:"Average per visit {v}", sumVisits:"{n} visits · {w} per week", sumBest:"Best {w}kg · best est. 1RM {r}kg",
+    e1rmNote:"Est. 1RM uses the Epley formula (weight × (1 + reps/30)) on the best set of each day.", perDay:"Per day", perWeek:"Per week (from Monday)", perMonth:"Per month",
+    weekOf:"Week of {d}"
   }
 };
 const PARTS = ["胸","背中","肩","脚","お尻","腕","腹","有酸素"];
@@ -589,6 +627,22 @@ function partsFor(type){
     .sort((a,b)=> b.n-a.n || PARTS.indexOf(a.p)-PARTS.indexOf(b.p));
 }
 const isCardio = e => e && e.type==="cardio";
+
+// ---------- estimated calories: METs × body weight (kg) × hours (Compendium of Physical Activities) ----------
+const MET_STRENGTH = 3.5; // resistance training, general: gym time that isn't cardio
+const MET_CARDIO = {treadmill:6.0, bike:7.0, elliptical:5.0, rowing:7.0, stairs:9.0};
+const MET_CARDIO_OTHER = 6.0;
+const bodyKg = ()=> S.settings.bw || 65;
+const kcalOf = (met, sec)=> met*bodyKg()*sec/3600;
+function sessionKcal(x, until){
+  const sets = sessionSets(x); let cardio=0, kc=0, strengthSets=0;
+  for(const s of sets){ if(isCardio(exById(s.ex))){ cardio += s.d||0; kc += kcalOf(MET_CARDIO[s.ex]||MET_CARDIO_OTHER, s.d||0); } else strengthSets++; }
+  const stay = ((until||x.end) - x.start)/1000;
+  // sets logged without timing leave no stay time, so count at least 90 s per set
+  return kc + kcalOf(MET_STRENGTH, Math.max(stay - cardio, strengthSets*90, 0));
+}
+function dayKcal(k){ return S.sessions.filter(x=>dayKey(x.start)===k).reduce((a,x)=>a+sessionKcal(x),0); }
+const kcalTxt = k=> t("kcal",{k:Math.round(k).toLocaleString()});
 const nav = {cat:null, part:null};
 
 // ---------- audio / wake lock ----------
@@ -621,7 +675,7 @@ function stopSet(askReps){
   const tm=T(); if(tm.phase!=="work") return null; const now=Date.now();
   const s = logSet(tm.exId, Math.round((now-tm.start)/1000), tm.start);
   const x = sessionFor(now); x.end=now; x.u=now; s.sid=x.id;
-  if(isCardio(exById(tm.exId))){ s.w=0; s.r=0; S.timer={phase:"idle"}; save({}); render(); toast(t("cardioDone",{name:exName(exById(s.ex)), t:fmt(s.d)})); return s; }
+  if(isCardio(exById(tm.exId))){ s.w=0; s.r=0; S.timer={phase:"idle"}; save({}); render(); toast(t("cardioDone",{name:exName(exById(s.ex)), t:fmt(s.d)})+" · "+kcalTxt(kcalOf(MET_CARDIO[s.ex]||MET_CARDIO_OTHER, s.d))); return s; }
   S.timer = {phase:"rest", exId:tm.exId, start:now, setId:s.id, beeped:false}; save({}); render();
   if(askReps!==false) askRepsFor(s.id);
   return s;
@@ -648,7 +702,7 @@ function endGym(){
   const x=openSession(); if(!x) return;
   if(S.timer.phase==="work") stopSet(false);
   S.timer={phase:"idle"}; x.closed=true; x.u=Date.now(); S.currentGym=null; save({}); render();
-  toast(t("gymDone",{d:fmtHM(x.end-x.start), n:sessionSets(x).length}));
+  toast(t("gymDone",{d:fmtHM(x.end-x.start), n:sessionSets(x).length})+" · "+kcalTxt(sessionKcal(x)));
   if(S.settings.autoCal) addToCalendar(x);
 }
 function logSet(exId, dur, ts){
@@ -709,7 +763,7 @@ function renderList(){
     <div class="sub">${dayLabel(todayKey())} · ${t("todaySets",{n:`<span class="num" style="font-size:16px">${todaySets}</span>`})} · ${t("sortNote")}</div>
     ${ox||S.currentGym?`<div class="visit"><div><div class="vl">${ox?t("inGym",{t:clock(ox.start)}):""}</div>
       <div class="sub"><b style="color:var(--ink)">${esc(gymName(ox||{gym:S.currentGym})||t("gymNone"))}</b> · <button class="link" style="padding:0" data-act="gym">${t("gymChange")}</button></div>
-      ${ox?`<div class="num vt" id="visitClock"></div>`:""}</div>
+      ${ox?`<div class="row" style="align-items:baseline;gap:10px"><div class="num vt" id="visitClock"></div><span class="sub" id="visitKcal"></span></div>`:""}</div>
       ${ox?`<button class="btn danger" data-act="endgym">${t("endGym")}</button>`:""}</div>`:""}
     <div class="cats">${["freq","machine","free","cardio"].map(k=>`<button class="${nav.cat===k?"on":""}" data-cat="${k}">${t(k)}</button>`).join("")}</div>
     ${body}
@@ -766,18 +820,18 @@ function renderEx(){
     </div>`;
 }
 
-function renderHistory(){
+function histListHTML(){
   const byDay = {};
   for(const s of S.sets){ (byDay[dayKey(s.t)] ||= []).push(s); }
   const days = Object.keys(byDay).sort().reverse();
   const limit = view.limit || 20;
-  app.innerHTML = `<h1>${t("histTitle")}</h1><div class="sub">${t("daysN",{n:days.length})}</div>
+  return `
     <div class="sec">${days.slice(0,limit).map(k=>{
       const list = byDay[k].sort((a,b)=>a.t-b.t); const groups=groupByEx(list);
       const vol = list.reduce((a,s)=>a+s.w*s.r,0);
       const visits = S.sessions.filter(x=>dayKey(x.start)===k).sort((a,b)=>a.start-b.start);
-      return `<div class="card day"><h3>${dayLabel(k)}<span>${t("totalVol",{n:list.length, v:Math.round(vol).toLocaleString()})}</span></h3>
-        ${visits.map(x=>`<div class="vrow"><span>${gymName(x)?esc(gymName(x))+" · ":""}${t("stay")} <b class="num">${clock(x.start)}–${clock(x.end)}</b>（${fmtHM(x.end-x.start)}）${x.closed?"":t("staying")}</span>
+      return `<div class="card day"><h3>${dayLabel(k)}<span>${t("totalVol",{n:list.length, v:Math.round(vol).toLocaleString()})}${visits.length?" · "+kcalTxt(dayKcal(k)):""}</span></h3>
+        ${visits.map(x=>`<div class="vrow"><span>${gymName(x)?esc(gymName(x))+" · ":""}${t("stay")} <b class="num">${clock(x.start)}–${clock(x.end)}</b>（${fmtHM(x.end-x.start)}）${x.closed?"":t("staying")} · ${kcalTxt(sessionKcal(x))}</span>
           ${x.closed?(x.cal?`<span class="calok">${t("calDone")}</span>`:`<button class="sbtn" data-cal="${x.id}">${t("calAdd")}</button>`):""}</div>
           ${x.closed&&!x.cal&&calFail[x.id]?`<p class="note">${esc(calFail[x.id])} <a href="${calLink(x)}" target="_blank" rel="noopener">${t("calOpen")}</a></p>`:""}`).join("")}
         <dl class="dl">${groups.map(g=>`<dt>${esc(exName(exById(g.ex)))}</dt><dd>${setsTxt(g.sets)}　<span class="sc">${t("setsN",{n:g.sets.length})}</span></dd>`).join("")}</dl></div>`;
@@ -785,11 +839,118 @@ function renderHistory(){
     ${days.length>limit?`<button class="btn" style="width:100%" data-act="more">${t("more")}</button>`:""}</div>`;
 }
 
+// ---------- charts (inline SVG, no libraries) ----------
+const hist = {mode:"list", metric:"ex", period:90, ex:null};
+const DAY = 86400000;
+function startOfDay(ts){ const d=new Date(ts); d.setHours(0,0,0,0); return d.getTime(); }
+function bucketOf(ts, unit){ const d=new Date(startOfDay(ts)); if(unit==="week") d.setDate(d.getDate()-((d.getDay()+6)%7)); else if(unit==="month") d.setDate(1); return d.getTime(); }
+function nextBucket(b, unit){ const d=new Date(b); if(unit==="day") d.setDate(d.getDate()+1); else if(unit==="week") d.setDate(d.getDate()+7); else d.setMonth(d.getMonth()+1); return d.getTime(); }
+function chartRange(){
+  const to=Date.now(); let from;
+  if(hist.period) from = startOfDay(to-(hist.period-1)*DAY);
+  else { from = to; for(const s of S.sets) if(s.t<from) from=s.t; for(const x of S.sessions) if(x.start<from) from=x.start; from=startOfDay(from); }
+  const span=(to-from)/DAY;
+  return {from, to, span, unit: span<=45?"day" : span<=200?"week" : "month"};
+}
+function bucketLabel(b, unit, long){
+  const d=new Date(b);
+  if(unit==="month") return isJa()? (long? d.getFullYear()+"年"+(d.getMonth()+1)+"月" : (d.getMonth()+1)+"月") : d.toLocaleDateString("en-US", long?{month:"short",year:"numeric"}:{month:"short"});
+  if(long) return unit==="week"? t("weekOf",{d:(d.getMonth()+1)+"/"+d.getDate()}) : dayLabel(dayKey(b));
+  return (d.getMonth()+1)+"/"+d.getDate();
+}
+// sum valFn(item) per bucket, empty buckets included
+function perBucket(r, items, tsFn, valFn){
+  const bs=[]; for(let b=bucketOf(r.from,r.unit); b<=r.to; b=nextBucket(b,r.unit)) bs.push(b);
+  const idx=new Map(bs.map((b,i)=>[b,i])), v=bs.map(()=>0);
+  for(const it of items){ const ts=tsFn(it); if(ts<r.from||ts>r.to) continue; const i=idx.get(bucketOf(ts,r.unit)); if(i!=null) v[i]+=valFn(it); }
+  return bs.map((b,i)=>({b, v:v[i], label:bucketLabel(b,r.unit), long:bucketLabel(b,r.unit,true)}));
+}
+function niceStep(span, n){ const raw=span/n; const p=Math.pow(10,Math.floor(Math.log10(raw))); const m=raw/p; return (m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10)*p; }
+function fmtAxis(v){ return v>=10000? Math.round(v/100)/10+"k" : String(Math.round(v*10)/10); }
+const CW=340, CH=190, CL=40, CR=8, CT=12, CB=24;
+function gridY(lo, hi, st, y){ let g=""; for(let v=lo; v<=hi+st/1000; v+=st) g+=`<line x1="${CL}" x2="${CW-CR}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" class="gl"/><text x="${CL-6}" y="${(y(v)+3.5).toFixed(1)}" class="ya">${fmtAxis(v)}</text>`; return g; }
+function barChart(pts, tipFn){
+  const iw=CW-CL-CR, ih=CH-CT-CB;
+  const mx=Math.max(0,...pts.map(p=>p.v)), st=niceStep(mx||1,4), top=Math.ceil((mx||1)/st)*st;
+  const y=v=>CT+ih-(v/top)*ih, n=pts.length, bw=iw/n, every=Math.ceil(n/6);
+  let bars="", xl="";
+  pts.forEach((p,i)=>{ const x=CL+i*bw;
+    bars+=`<g data-tip="${esc(tipFn(p))}"><rect x="${x.toFixed(1)}" y="${CT}" width="${bw.toFixed(1)}" height="${ih}" fill="transparent"/>${p.v>0?`<rect class="col hl" x="${(x+bw*.15).toFixed(1)}" y="${y(p.v).toFixed(1)}" width="${Math.max(1,bw*.7).toFixed(1)}" height="${Math.max(1,ih*p.v/top).toFixed(1)}" rx="${Math.min(3,bw*.2).toFixed(1)}"/>`:""}</g>`;
+    if(i%every===0) xl+=`<text x="${(x+bw/2).toFixed(1)}" y="${CH-6}" class="xa">${esc(p.label)}</text>`; });
+  return `<svg class="chart" viewBox="0 0 ${CW} ${CH}" role="img">${gridY(0,top,st,y)}${bars}${xl}</svg>`;
+}
+// days: [{ts, a, b, tip}] two series drawn as lines (a = top weight, b = est. 1RM)
+function lineChart(r, days){
+  const iw=CW-CL-CR, ih=CH-CT-CB;
+  const all=days.flatMap(d=>[d.a,d.b]); let mn=Math.min(...all), mx=Math.max(...all);
+  const st=niceStep((mx-mn)||mx||1,4); const lo=Math.max(0,Math.floor(mn/st)*st - (mx===mn?st:0)), hi=Math.ceil(mx/st)*st + (mx===mn?st:0);
+  const y=v=>CT+ih-((v-lo)/(hi-lo))*ih, x=ts=>CL+((ts-r.from)/Math.max(1,r.to-r.from))*iw;
+  const path=k=>days.map((d,i)=>(i?"L":"M")+x(d.ts).toFixed(1)+" "+y(d[k]).toFixed(1)).join("");
+  let xl=""; for(let i=0;i<4;i++){ const ts=r.from+(r.to-r.from)*(i+.5)/4; const d=new Date(ts); xl+=`<text x="${x(ts).toFixed(1)}" y="${CH-6}" class="xa">${d.getMonth()+1}/${d.getDate()}</text>`; }
+  const dots=days.map(d=>`<g data-tip="${esc(d.tip)}"><circle cx="${x(d.ts).toFixed(1)}" cy="${y(d.a).toFixed(1)}" r="12" fill="transparent"/><circle class="dot hl b" cx="${x(d.ts).toFixed(1)}" cy="${y(d.b).toFixed(1)}" r="3.5"/><circle class="dot hl a" cx="${x(d.ts).toFixed(1)}" cy="${y(d.a).toFixed(1)}" r="3.5"/></g>`).join("");
+  return `<svg class="chart" viewBox="0 0 ${CW} ${CH}" role="img">${gridY(lo,hi,st,y)}<path class="ln b" d="${path("b")}"/><path class="ln a" d="${path("a")}"/>${dots}${xl}</svg>`;
+}
+const e1rm = s=> s.r>1? s.w*(1+s.r/30) : s.w;
+function chartHTML(){
+  const r=chartRange(); const used=new Set(S.sets.map(s=>s.sid));
+  const visits=S.sessions.filter(x=>used.has(x.id));
+  const per=[[30,"p30"],[90,"p90"],[365,"p365"],[0,"pAll"]];
+  const mets={ex:"mEx",vol:"mVol",kcal:"mKcal",stay:"mStay",visits:"mVisits",parts:"mParts",cardio:"mCardio"};
+  const unitTxt={day:t("perDay"),week:t("perWeek"),month:t("perMonth")}[r.unit];
+  const inR=ts=>ts>=r.from&&ts<=r.to;
+  let sel="", summary="", chart="", legend="", note="";
+  const bars=(pts,fmtV,sumV)=>{ if(!pts.some(p=>p.v>0)) return false; chart=barChart(pts,p=>p.long+"　"+fmtV(p.v)); summary=sumV; note=unitTxt+" · "+t("tapHint"); return true; };
+  const m=hist.metric;
+  if(m==="ex"){
+    const opts=sortedExercises(()=>true).filter(x=>x.n>0);
+    if(!opts.some(x=>x.e.id===hist.ex)) hist.ex=(opts.find(x=>!isCardio(x.e))||opts[0]||{e:{}}).e.id||null;
+    sel=opts.length?`<select id="hex" class="exsel">${opts.map(x=>`<option value="${esc(x.e.id)}" ${x.e.id===hist.ex?"selected":""}>${esc(exName(x.e))}</option>`).join("")}</select>`:"";
+    const e=exById(hist.ex); const sets=S.sets.filter(s=>s.ex===hist.ex&&inR(s.t));
+    if(e&&isCardio(e)){ const pts=perBucket(r,sets,s=>s.t,s=>(s.d||0)/60); bars(pts,v=>Math.round(v)+t("cMin"),t("sumTotal",{v:Math.round(pts.reduce((a,p)=>a+p.v,0))+t("cMin")})); }
+    else if(sets.length){
+      const byDay={}; for(const s of sets){ const k=startOfDay(s.t); const d=byDay[k]||(byDay[k]={ts:k+DAY/2,a:0,b:0}); d.a=Math.max(d.a,s.w); d.b=Math.max(d.b,e1rm(s)); }
+      const days=Object.values(byDay).sort((p,q)=>p.ts-q.ts).map(d=>Object.assign(d,{a:Math.round(d.a*10)/10,b:Math.round(d.b*10)/10,tip:dayLabel(dayKey(d.ts))+"　"+t("maxW")+" "+fmtKg(Math.round(d.a*10)/10)+"kg · "+t("e1rm")+" "+fmtKg(Math.round(d.b*10)/10)+"kg"}));
+      chart=lineChart(r,days);
+      summary=t("sumBest",{w:fmtKg(Math.max(...days.map(d=>d.a))), r:fmtKg(Math.max(...days.map(d=>d.b)))});
+      legend=`<div class="legend"><span><i style="background:var(--violet-hi)"></i>${t("maxW")}</span><span><i style="background:var(--pink)"></i>${t("e1rm")}</span></div>`;
+      note=t("e1rmNote")+" "+t("tapHint");
+    }
+  } else if(m==="vol"){ const pts=perBucket(r,S.sets.filter(s=>!isCardio(exById(s.ex))),s=>s.t,s=>(s.w||0)*(s.r||0)); bars(pts,v=>Math.round(v).toLocaleString()+"kg",t("sumTotal",{v:Math.round(pts.reduce((a,p)=>a+p.v,0)).toLocaleString()+"kg"})); }
+  else if(m==="kcal"){ const pts=perBucket(r,visits,x=>x.start,x=>sessionKcal(x)); const n=visits.filter(x=>inR(x.start)).length, tot=pts.reduce((a,p)=>a+p.v,0);
+    if(bars(pts,v=>kcalTxt(v),t("sumTotal",{v:kcalTxt(tot)})+" · "+t("sumAvg",{v:kcalTxt(tot/Math.max(1,n))}))) note=t("bwNote")+(S.settings.bw?"":" "+t("bwUnset"))+"<br>"+note; }
+  else if(m==="stay"){ const pts=perBucket(r,visits,x=>x.start,x=>(x.end-x.start)); const n=visits.filter(x=>inR(x.start)).length, tot=pts.reduce((a,p)=>a+p.v,0);
+    pts.forEach(p=>p.v/=60000); bars(pts,v=>fmtHM(v*60000),t("sumTotal",{v:fmtHM(tot)})+" · "+t("sumAvg",{v:fmtHM(tot/Math.max(1,n))})); }
+  else if(m==="visits"){ const pts=perBucket(r,visits,x=>x.start,()=>1); const n=pts.reduce((a,p)=>a+p.v,0); bars(pts,v=>t("visitsN",{n:v}),t("sumVisits",{n, w:(n/Math.max(1,(r.to-r.from)/DAY/7)).toFixed(1)})); }
+  else if(m==="cardio"){ const pts=perBucket(r,S.sets.filter(s=>isCardio(exById(s.ex))),s=>s.t,s=>(s.d||0)/60); bars(pts,v=>Math.round(v)+t("cMin"),t("sumTotal",{v:Math.round(pts.reduce((a,p)=>a+p.v,0))+t("cMin")})); }
+  else if(m==="parts"){
+    const c={}; for(const s of S.sets){ const e=exById(s.ex); if(!e||isCardio(e)||!inR(s.t)) continue; c[e.part]=(c[e.part]||0)+1; }
+    const rows=Object.entries(c).sort((a,b)=>b[1]-a[1]); const mx=rows.length?rows[0][1]:1;
+    if(rows.length){ chart=rows.map(([p,n])=>`<div class="hb"><span>${esc(partName(p))}</span><div class="hbt"><i style="width:${(n/mx*100).toFixed(1)}%"></i></div><b>${n}</b></div>`).join("");
+      summary=t("sumTotal",{v:t("setsN",{n:rows.reduce((a,x)=>a+x[1],0)})}); }
+  }
+  return `<div class="chips" style="margin-top:12px">${per.map(([d,k])=>`<button class="chip ${hist.period===d?"on":""}" data-period="${d}">${t(k)}</button>`).join("")}</div>
+    <div class="chips" style="margin-top:8px">${Object.entries(mets).map(([k,l])=>`<button class="chip ${m===k?"on":""}" data-metric="${k}">${t(l)}</button>`).join("")}</div>
+    <div class="card" style="margin-top:12px">${sel}
+      ${chart?`<div class="tip" id="tip" data-sum="${esc(summary)}">${esc(summary)}</div>${chart}${legend}<p class="note">${note}</p>`:`<div class="empty">${t("noData")}</div>`}
+    </div>`;
+}
+function renderHistory(){
+  const n=new Set(S.sets.map(s=>dayKey(s.t))).size;
+  app.innerHTML = `<h1>${t("histTitle")}</h1><div class="sub">${t("daysN",{n})}</div>
+    <div class="seg" style="margin-top:12px"><button data-hmode="list" class="${hist.mode==="list"?"on":""}">${t("hList")}</button><button data-hmode="chart" class="${hist.mode==="chart"?"on":""}">${t("hChart")}</button></div>
+    ${hist.mode==="chart"? chartHTML() : histListHTML()}`;
+}
+
 function renderSettings(){
   const exs = S.exercises.slice().sort((a,b)=> (a.type<b.type?-1:a.type>b.type?1:0) || PARTS.indexOf(a.part)-PARTS.indexOf(b.part) || a.o-b.o);
   app.innerHTML = `<h1>${t("settings")}</h1>
     <div class="sec"><h2>${t("language")}</h2><div class="card"><div class="seg">
       <button data-setlang="ja" class="${isJa()?"on":""}">日本語</button><button data-setlang="en" class="${isJa()?"":"on"}">English</button></div></div></div>
+    <div class="sec"><h2>${t("bwHead")}</h2><div class="card">
+      <div class="row"><input id="bw" class="bwin num" inputmode="decimal" placeholder="65" value="${S.settings.bw?fmtKg(S.settings.bw):""}"><span class="unit" style="margin:0">kg</span></div>
+      ${S.settings.bw?"":`<p class="note" style="color:var(--violet-hi)">${t("bwUnset")}</p>`}
+      <p class="note">${t("bwNote")}</p>
+    </div></div>
     <div class="sec"><h2>${t("storage")}</h2><div class="card">
       <div class="status ${sync.on?"ok":""}"><i></i>${sync.on?t("cloudOn"):t("cloudOff")}</div>
       <p class="note">${sync.on?t("cloudOnNote"):t("cloudOffNote")}${sync.err?"<br>"+t("syncFail"):""}</p>
@@ -824,6 +985,7 @@ function tick(){
   const el = id=>document.getElementById(id);
   if(autoClose(now)){ save({}); if(view.name==="list"||view.name==="history") return render(); }
   const vc=el("visitClock"); const ox=openSession(); if(vc&&ox) vc.textContent = fmtLong(((tm.phase==="idle"?ox.end:now) - ox.start)/1000);
+  const vk=el("visitKcal"); if(vk&&ox) vk.textContent = kcalTxt(sessionKcal(ox, tm.phase==="idle"?ox.end:now));
   const onMine = view.name==="ex" && tm.exId===view.ex;
   if(tm.phase==="rest"){
     const sec=(now-tm.start)/1000, target=S.settings.rest;
@@ -961,8 +1123,13 @@ document.getElementById("pill").addEventListener("click", ()=>{ const id=documen
 sheet.addEventListener("click", ev=>{ if(ev.target.dataset.act==="close") closeSheet(); });
 
 app.addEventListener("click", ev=>{
+  const tipG = ev.target.closest("[data-tip]");
+  if(tipG){ const tip=document.getElementById("tip"); if(tip) tip.textContent=tipG.dataset.tip; app.querySelectorAll(".hl.on").forEach(x=>x.classList.remove("on")); tipG.querySelectorAll(".hl").forEach(x=>x.classList.add("on")); return; }
   const b = ev.target.closest("button"); if(!b) return;
   const d=b.dataset;
+  if(d.hmode){ hist.mode=d.hmode; render(); return; }
+  if(d.period!=null){ hist.period=+d.period; render(); return; }
+  if(d.metric){ hist.metric=d.metric; render(); return; }
   if(d.cat){ nav.cat=d.cat; nav.part=null; render(); return; }
   if(d.part){ nav.part=d.part; window.scrollTo(0,0); render(); return; }
   if(d.ex){ view={name:"ex",ex:d.ex,filter:view.filter}; window.scrollTo(0,0); render(); return; }
@@ -989,7 +1156,7 @@ app.addEventListener("click", ev=>{
     case "add": addExercise(); break;
     case "more": view.limit=(view.limit||20)+20; render(); break;
     case "copy": {
-      const txt=JSON.stringify({v:1,exercises:S.exercises,sets:S.sets,sessions:S.sessions,gyms:S.gyms,deleted:S.deleted,deletedEx:S.deletedEx||[]});
+      const txt=JSON.stringify({v:1,exercises:S.exercises,sets:S.sets,sessions:S.sessions,gyms:S.gyms,deleted:S.deleted,deletedEx:S.deletedEx||[],bw:S.settings.bw||null,bwU:S.settings.bwU||0});
       const ta=document.getElementById("imp");
       Promise.resolve().then(()=>navigator.clipboard.writeText(txt)).then(()=>toast(t("copied")),()=>{ ta.value=txt; ta.select(); toast(t("selected")); });
       break; }
@@ -1000,6 +1167,8 @@ app.addEventListener("click", ev=>{
   }
 });
 app.addEventListener("change", ev=>{
+  if(ev.target.id==="hex"){ hist.ex=ev.target.value; render(); return; }
+  if(ev.target.id==="bw"){ const w=parseFloat(ev.target.value); if(!isNaN(w)&&w>=20&&w<=300){ S.settings.bw=Math.round(w*10)/10; S.settings.bwU=Date.now(); save({}); } render(); return; }
   if(ev.target.id==="w"){ const w=parseFloat(ev.target.value); if(!isNaN(w)&&w>=0) setVals(view.ex,{w}); ev.target.value=fmtKg(vals(view.ex).w); }
 });
 app.addEventListener("focusin", ev=>{ if(ev.target.matches(".stepper input")) setTimeout(()=>ev.target.select(),0); });
@@ -1024,6 +1193,7 @@ function mergeIn(p){
   for(const g of (p.gyms||[])){ if(g&&g.id&&!gm.has(g.id)) gm.set(g.id, Object.assign({},g)); }
   S.gyms=[...gm.values()];
   if(!S.settings.lang && p.lang) S.settings.lang=p.lang;
+  if(p.bw && (p.bwU||0)>(S.settings.bwU||0)){ S.settings.bw=p.bw; S.settings.bwU=p.bwU||0; }
   if(p.last) for(const k in p.last) if(!S.last[k]) S.last[k]=p.last[k];
 }
 
@@ -1037,7 +1207,7 @@ async function push(){
     const months=[...dirtyMonths]; dirtyMonths.clear();
     for(const m of months){ await sync.col.doc("m-"+m).set({sets: S.sets.filter(s=>monthKey(s.t)===m)}); }
     if(metaDirty || months.length){ metaDirty=false;
-      await sync.col.doc("meta").set({exercises:S.exercises, sessions:S.sessions, gyms:S.gyms, lang:S.settings.lang||null, deleted:S.deleted, deletedEx:S.deletedEx||[], last:S.last, u:Date.now()}); }
+      await sync.col.doc("meta").set({exercises:S.exercises, sessions:S.sessions, gyms:S.gyms, lang:S.settings.lang||null, bw:S.settings.bw||null, bwU:S.settings.bwU||0, deleted:S.deleted, deletedEx:S.deletedEx||[], last:S.last, u:Date.now()}); }
     sync.err=false;
   }catch(e){ sync.err=true; metaDirty=true; setTimeout(scheduleSync, 15000); }
   sync.busy=false;
@@ -1053,7 +1223,7 @@ async function push(){
     const snap = await sync.col.get();
     const remote = {sets:[], sessions:[], exercises:[], deleted:[], deletedEx:[], last:null};
     for(const doc of snap.docs){ const d=doc.data()||{};
-      if(doc.id==="meta"){ remote.exercises=d.exercises||[]; remote.sessions=d.sessions||[]; remote.gyms=d.gyms||[]; remote.lang=d.lang||null; remote.deleted=d.deleted||[]; remote.deletedEx=d.deletedEx||[]; remote.last=d.last||null; }
+      if(doc.id==="meta"){ remote.exercises=d.exercises||[]; remote.sessions=d.sessions||[]; remote.gyms=d.gyms||[]; remote.lang=d.lang||null; remote.bw=d.bw||null; remote.bwU=d.bwU||0; remote.deleted=d.deleted||[]; remote.deletedEx=d.deletedEx||[]; remote.last=d.last||null; }
       else if(doc.id.startsWith("m-")) remote.sets.push(...(d.sets||[])); }
     const remoteIds = new Set(remote.sets.map(s=>s.id));
     mergeIn(remote);
@@ -1070,7 +1240,7 @@ function isoLocal(ts){ const d=new Date(ts); return d.getFullYear()+"-"+pad(d.ge
 function utcStamp(ts){ return new Date(ts).toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,""); }
 function calText(x){
   const lines = groupByEx(sessionSets(x)).map(g=>exName(exById(g.ex))+": " + (isCardio(exById(g.ex))? setsTxt(g.sets) : g.sets.map(s=>fmtKg(s.w)+"kg×"+s.r).join(", ")+" ("+t("setsN",{n:g.sets.length})+")"));
-  return t("calStay",{d:fmtHM(x.end-x.start), n:sessionSets(x).length})+"\n"+lines.join("\n");
+  return t("calStay",{d:fmtHM(x.end-x.start), n:sessionSets(x).length})+" · "+kcalTxt(sessionKcal(x))+"\n"+lines.join("\n");
 }
 function calEnd(x){ return Math.max(x.end, x.start+5*60000); }
 function calLink(x){
