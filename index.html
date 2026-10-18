@@ -354,7 +354,7 @@ const I18N = {
     h:"{h}時間{m}分", m:"{m}分", kg:"kg", repUnit:"回",
     freq:"よく使う", cardio:"有酸素", freqEmpty:"まだ記録がありません。マシン・フリーウェイト・有酸素から種目を選ぶと、よく使う種目がここに集まります。",
     pickPart:"部位を選んでください", allParts:"‹ 部位一覧", exN:"{n}種目", cardioDone:"{name} {t} を記録しました", cardioHint:"終わったらストップで時間を記録します",
-    nearHead:"現在地の近くのジム", nearSearching:"現在地から探しています…", nearNone:"現在地は取得できました（誤差 約{acc}m）が、地図データ（OpenStreetMap）の半径3km以内にジムが登録されていませんでした。下に名前を入力して登録できます。",
+    nearHead:"現在地から自動で選ぶ", autoNone:"近くに登録済みのジムはありません。下でジムを選ぶか名前を入力すると、この場所を覚えて次回から自動で選びます。", nearSearching:"現在地から探しています…", nearNone:"現在地は取得できました（誤差 約{acc}m）が、地図データ（OpenStreetMap）の半径3km以内にジムが登録されていませんでした。下に名前を入力して登録できます。",
     nearDenied:"位置情報が使えません。iPhoneの「設定」→「プライバシーとセキュリティ」→「位置情報サービス」で、Safariを「使用中のみ許可」にしてください。",
     nearErr:"地図データのサーバーが混み合っていて検索できませんでした。少し時間をおいて「もう一度探す」を押してください。", nearLocating:"① 現在地を取得しています…（許可を求める表示が出たら「許可」を押してください）", nearQuerying:"② 現在地を取得しました（誤差 約{acc}m）。近くのジムを検索しています…", nearSlow:"地図データのサーバーから返事がありませんでした。少し待って「もう一度探す」を押してください。", nearNoPos:"現在地を取得できませんでした。屋内で電波が弱いと失敗することがあります。「もう一度探す」を押してください。", nearMaps:"Googleマップで近くのジムを見る", nearRetry:"もう一度探す", savedHead:"登録済みのジム", typeHead:"見つからないときは名前を入力",
     gymQ:"どこのジムにいますか？", gymNew:"新しいジムを登録", gymNamePh:"ここに貼り付け、または名前を入力", gymSkip:"あとで", gymMap:"Googleマップで近くのジムを探す",
@@ -411,7 +411,7 @@ const I18N = {
     h:"{h}h {m}m", m:"{m} min", kg:"kg", repUnit:"",
     freq:"Frequent", cardio:"Cardio", freqEmpty:"No records yet. Pick an exercise from Machine, Free weight or Cardio and your most used ones will collect here.",
     pickPart:"Choose a body part", allParts:"‹ Body parts", exN:"{n} exercises", cardioDone:"Logged {name} {t}", cardioHint:"Press Stop when done to log the time",
-    nearHead:"Gyms near you", nearSearching:"Searching around your location…", nearNone:"Got your location (within about {acc} m), but the map data (OpenStreetMap) has no gyms within 3 km. You can type a name below.",
+    nearHead:"Auto-select from your location", autoNone:"No saved gym nearby. Pick or type your gym below and it will be remembered for this spot and chosen automatically next time.", nearSearching:"Searching around your location…", nearNone:"Got your location (within about {acc} m), but the map data (OpenStreetMap) has no gyms within 3 km. You can type a name below.",
     nearDenied:"Location is unavailable. Allow Safari in Settings → Privacy & Security → Location Services.",
     nearErr:"The map data servers are busy. Wait a moment and press Search again.", nearLocating:"1) Getting your location… (tap Allow if asked)", nearQuerying:"2) Got your location (within about {acc} m). Searching for gyms…", nearSlow:"The map data server did not answer. Wait a moment and press Search again.", nearNoPos:"Couldn't get your location. This can fail indoors with weak signal; press Search again.", nearMaps:"See nearby gyms in Google Maps", nearRetry:"Search again", savedHead:"Saved gyms", typeHead:"Not listed? Type the name",
     gymQ:"Which gym are you at?", gymNew:"Add a new gym", gymNamePh:"Paste here or type a name", gymSkip:"Later", gymMap:"Find nearby gyms in Google Maps",
@@ -524,8 +524,8 @@ function askGym(){
     <div class="row"><input id="gn" class="gyminput" placeholder="${esc(t("gymNamePh"))}" style="flex:1;min-width:0;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:11px;font-size:16px;color:var(--ink)"><button class="btn primary" id="gadd">${t("gymReg")}</button></div>
     <button class="btn" data-act="close">${t("gymSkip")}</button>
   </div></div>`;
-  sheet.querySelectorAll("[data-gym]").forEach(b=>b.onclick=()=>{ closeSheet(); chooseGym(b.dataset.gym); });
-  showNearby();
+  sheet.querySelectorAll("[data-gym]").forEach(b=>b.onclick=()=>{ const g=gymById(b.dataset.gym); if(g&&g.lat==null&&lastPos){ g.lat=lastPos.lat; g.lon=lastPos.lon; } closeSheet(); chooseGym(b.dataset.gym); });
+  autoGym();
   const gn=sheet.querySelector("#gn");
   gn.addEventListener("paste", ev=>{
     const txt=(ev.clipboardData||window.clipboardData)?.getData("text")||""; const p=parseMapsShare(txt);
@@ -534,7 +534,7 @@ function askGym(){
   gn.addEventListener("input", ()=>{ if(/https?:\/\//.test(gn.value)){ const p=parseMapsShare(gn.value); gn.value=p.name; gn.dataset.url=p.url||""; } });
   sheet.querySelector("#gadd").onclick=()=>{
     const name=gn.value.trim(); if(!name){ gn.focus(); return; }
-    const g={id:"g"+uid(), name, url:gn.dataset.url||"", u:Date.now()}; S.gyms.push(g); closeSheet(); chooseGym(g.id);
+    const g=Object.assign({id:"g"+uid(), name, url:gn.dataset.url||"", u:Date.now()}, lastPos?{lat:lastPos.lat, lon:lastPos.lon}:{}); S.gyms.push(g); closeSheet(); chooseGym(g.id);
   };
 }
 // ---------- nearby gyms ----------
@@ -546,8 +546,8 @@ const within = (p, ms, err) => Promise.race([p, new Promise((_,ng)=>setTimeout((
 function getPos(){
   const once = o => within(new Promise((ok,ng)=>navigator.geolocation.getCurrentPosition(p=>ok(p.coords), ng, o)), o.timeout+5000, {code:3});
   if(!navigator.geolocation) return Promise.reject({code:2});
-  return once({enableHighAccuracy:false, timeout:10000, maximumAge:600000})
-    .catch(e=> e && e.code===1 ? Promise.reject(e) : once({enableHighAccuracy:true, timeout:20000, maximumAge:600000}));
+  return once({enableHighAccuracy:false, timeout:10000, maximumAge:60000})
+    .catch(e=> e && e.code===1 ? Promise.reject(e) : once({enableHighAccuracy:true, timeout:20000, maximumAge:60000}));
 }
 // gyms are tagged inconsistently in OpenStreetMap (especially in Japan), so match tags and common names; ask all servers at once
 async function overpass(lat, lon){
@@ -558,6 +558,21 @@ async function overpass(lat, lon){
     fetch(h, {method:"POST", body:"data="+encodeURIComponent(q), headers:{"Content-Type":"application/x-www-form-urlencoded"}, signal:ctl.signal})
       .then(r=>{ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); }).then(j=>{ clearTimeout(tm); ok(j.elements||[]); }).catch(e=>{ clearTimeout(tm); ng(e); }); });
   return within(new Promise((ok,ng)=>{ let left=hosts.length, last; hosts.forEach(h=>one(h).then(ok, e=>{ last=e; if(--left===0) ng(last); })); }), 35000, {slow:true});
+}
+let lastPos=null;
+// GPS → the nearest saved gym within 500 m is selected without asking (no map server involved)
+async function autoGym(){
+  const box=()=>sheet.querySelector("#nearList"), paint=h=>{ const b=box(); if(b) b.innerHTML=h; }, note=x=>`<div class="note" style="margin:0">${x}</div>`;
+  paint(note(t("nearLocating")));
+  try{
+    const c=await getPos(); lastPos={lat:c.latitude, lon:c.longitude};
+    const near=S.gyms.filter(g=>g.lat!=null).map(g=>({g, d:distM(c.latitude,c.longitude,g.lat,g.lon)})).sort((x,y)=>x.d-y.d)[0];
+    if(near && near.d<=500){ if(box()){ closeSheet(); chooseGym(near.g.id); } return; }
+    paint(note(t("autoNone"))+mapsLink(c.latitude,c.longitude));
+  }catch(e){
+    paint(note(e&&e.code===1 ? t("nearDenied") : t("nearNoPos"))+`<button class="btn" id="nearAgain">${t("nearRetry")}</button>`);
+    const r=sheet.querySelector("#nearAgain"); if(r) r.onclick=autoGym;
+  }
 }
 function mapsLink(lat, lon){ return `<a class="maplink" href="https://www.google.com/maps/search/${encodeURIComponent(isJa()?"ジム":"gym")}${lat!=null?`/@${lat},${lon},15z`:""}" target="_blank" rel="noopener">${t("nearMaps")}</a>`; }
 async function nominatim(lat, lon){
@@ -998,7 +1013,7 @@ function renderSettings(){
       <textarea id="imp" placeholder="${esc(t("pastePh"))}"></textarea>
       <div class="row" style="margin-top:8px"><button class="btn" data-act="import">${t("load")}</button></div>
     </div></div>
-    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261018-1551</p>`;
+    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261018-1555</p>`;
 }
 
 // ---------- tick ----------
