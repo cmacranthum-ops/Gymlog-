@@ -354,9 +354,9 @@ const I18N = {
     h:"{h}時間{m}分", m:"{m}分", kg:"kg", repUnit:"回",
     freq:"よく使う", cardio:"有酸素", freqEmpty:"まだ記録がありません。マシン・フリーウェイト・有酸素から種目を選ぶと、よく使う種目がここに集まります。",
     pickPart:"部位を選んでください", allParts:"‹ 部位一覧", exN:"{n}種目", cardioDone:"{name} {t} を記録しました", cardioHint:"終わったらストップで時間を記録します",
-    nearHead:"現在地の近くのジム", nearSearching:"現在地から探しています…", nearNone:"近くにジムが見つかりませんでした。下に名前を入力して登録できます。",
+    nearHead:"現在地の近くのジム", nearSearching:"現在地から探しています…", nearNone:"現在地は取得できました（誤差 約{acc}m）が、地図データ（OpenStreetMap）の半径3km以内にジムが登録されていませんでした。下に名前を入力して登録できます。",
     nearDenied:"位置情報が使えません。iPhoneの「設定」→「プライバシーとセキュリティ」→「位置情報サービス」で、Safariを「使用中のみ許可」にしてください。",
-    nearErr:"地図データを取得できませんでした。電波の良い場所で「もう一度探す」を押してください。", nearNoPos:"現在地を取得できませんでした。屋内で電波が弱いと失敗することがあります。「もう一度探す」を押してください。", nearMaps:"Googleマップで近くのジムを見る", nearRetry:"もう一度探す", savedHead:"登録済みのジム", typeHead:"見つからないときは名前を入力",
+    nearErr:"地図データを取得できませんでした。電波の良い場所で「もう一度探す」を押してください。", nearLocating:"① 現在地を取得しています…（許可を求める表示が出たら「許可」を押してください）", nearQuerying:"② 現在地を取得しました（誤差 約{acc}m）。近くのジムを検索しています…", nearSlow:"地図データのサーバーから返事がありませんでした。少し待って「もう一度探す」を押してください。", nearNoPos:"現在地を取得できませんでした。屋内で電波が弱いと失敗することがあります。「もう一度探す」を押してください。", nearMaps:"Googleマップで近くのジムを見る", nearRetry:"もう一度探す", savedHead:"登録済みのジム", typeHead:"見つからないときは名前を入力",
     gymQ:"どこのジムにいますか？", gymNew:"新しいジムを登録", gymNamePh:"ここに貼り付け、または名前を入力", gymSkip:"あとで", gymMap:"Googleマップで近くのジムを探す",
     gymMapNote:"地図でジムを開き「共有」→「コピー」して、下の欄に貼り付けるとジム名が自動で入ります。登録したジムは次回から候補に出ます。", gymReg:"登録して選ぶ", gymSel:"「{name}」で記録します", gymChange:"変更",
     gymNone:"ジム未選択", gyms:"ジム", gymsNote:"よく行くジムが上に並びます。", visitsN:"{n}回",
@@ -411,9 +411,9 @@ const I18N = {
     h:"{h}h {m}m", m:"{m} min", kg:"kg", repUnit:"",
     freq:"Frequent", cardio:"Cardio", freqEmpty:"No records yet. Pick an exercise from Machine, Free weight or Cardio and your most used ones will collect here.",
     pickPart:"Choose a body part", allParts:"‹ Body parts", exN:"{n} exercises", cardioDone:"Logged {name} {t}", cardioHint:"Press Stop when done to log the time",
-    nearHead:"Gyms near you", nearSearching:"Searching around your location…", nearNone:"No gyms found nearby. You can type a name below.",
+    nearHead:"Gyms near you", nearSearching:"Searching around your location…", nearNone:"Got your location (within about {acc} m), but the map data (OpenStreetMap) has no gyms within 3 km. You can type a name below.",
     nearDenied:"Location is unavailable. Allow Safari in Settings → Privacy & Security → Location Services.",
-    nearErr:"Couldn't load map data. Try again where you have signal.", nearNoPos:"Couldn't get your location. This can fail indoors with weak signal; press Search again.", nearMaps:"See nearby gyms in Google Maps", nearRetry:"Search again", savedHead:"Saved gyms", typeHead:"Not listed? Type the name",
+    nearErr:"Couldn't load map data. Try again where you have signal.", nearLocating:"1) Getting your location… (tap Allow if asked)", nearQuerying:"2) Got your location (within about {acc} m). Searching for gyms…", nearSlow:"The map data server did not answer. Wait a moment and press Search again.", nearNoPos:"Couldn't get your location. This can fail indoors with weak signal; press Search again.", nearMaps:"See nearby gyms in Google Maps", nearRetry:"Search again", savedHead:"Saved gyms", typeHead:"Not listed? Type the name",
     gymQ:"Which gym are you at?", gymNew:"Add a new gym", gymNamePh:"Paste here or type a name", gymSkip:"Later", gymMap:"Find nearby gyms in Google Maps",
     gymMapNote:"Open the gym in Maps, tap Share → Copy, and paste it below; the gym name fills in automatically. Saved gyms appear as choices next time.", gymReg:"Add and select", gymSel:"Logging at “{name}”", gymChange:"Change",
     gymNone:"No gym selected", gyms:"Gyms", gymsNote:"Your most visited gyms come first.", visitsN:"{n} visits",
@@ -542,8 +542,9 @@ let nearCache=null; // {at, items}
 function distM(a,b,c,d){ const R=6371000, r=Math.PI/180, x=(d-b)*r*Math.cos((a+c)/2*r), y=(c-a)*r; return Math.round(Math.sqrt(x*x+y*y)*R); }
 function fmtDist(m){ return m<1000? m+"m" : (m/1000).toFixed(1)+"km"; }
 // quick, coarse fix first (works indoors); fall back to GPS if that times out
+const within = (p, ms, err) => Promise.race([p, new Promise((_,ng)=>setTimeout(()=>ng(err), ms))]);
 function getPos(){
-  const once = o => new Promise((ok,ng)=>navigator.geolocation.getCurrentPosition(p=>ok(p.coords), ng, o));
+  const once = o => within(new Promise((ok,ng)=>navigator.geolocation.getCurrentPosition(p=>ok(p.coords), ng, o)), o.timeout+5000, {code:3});
   if(!navigator.geolocation) return Promise.reject({code:2});
   return once({enableHighAccuracy:false, timeout:10000, maximumAge:600000})
     .catch(e=> e && e.code===1 ? Promise.reject(e) : once({enableHighAccuracy:true, timeout:20000, maximumAge:600000}));
@@ -556,7 +557,7 @@ async function overpass(lat, lon){
   const one = h => new Promise((ok,ng)=>{ const ctl=new AbortController(); const tm=setTimeout(()=>ctl.abort(),30000);
     fetch(h, {method:"POST", body:"data="+encodeURIComponent(q), headers:{"Content-Type":"application/x-www-form-urlencoded"}, signal:ctl.signal})
       .then(r=>{ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); }).then(j=>{ clearTimeout(tm); ok(j.elements||[]); }).catch(e=>{ clearTimeout(tm); ng(e); }); });
-  return new Promise((ok,ng)=>{ let left=hosts.length, last; hosts.forEach(h=>one(h).then(ok, e=>{ last=e; if(--left===0) ng(last); })); });
+  return within(new Promise((ok,ng)=>{ let left=hosts.length, last; hosts.forEach(h=>one(h).then(ok, e=>{ last=e; if(--left===0) ng(last); })); }), 35000, {slow:true});
 }
 function mapsLink(lat, lon){ return `<a class="maplink" href="https://www.google.com/maps/search/${encodeURIComponent(isJa()?"ジム":"gym")}${lat!=null?`/@${lat},${lon},15z`:""}" target="_blank" rel="noopener">${t("nearMaps")}</a>`; }
 async function showNearby(force){
@@ -566,17 +567,18 @@ async function showNearby(force){
     let lat, lon, items;
     if(!force && nearCache && Date.now()-nearCache.at < 10*60000) ({lat,lon,items}=nearCache);
     else {
-      paint(`<div class="note" style="margin:0">${t("nearSearching")}</div>`);
-      const c = await getPos(); lat=c.latitude; lon=c.longitude;
+      paint(`<div class="note" style="margin:0">${t("nearLocating")}</div>`);
+      const c = await getPos(); lat=c.latitude; lon=c.longitude; var acc=Math.round(c.accuracy||0);
+      paint(`<div class="note" style="margin:0">${t("nearQuerying",{acc})}</div>`);
       const seen = new Set();
       items = (await overpass(lat, lon)).map(e=>{ const tg=e.tags||{}; const la=e.lat??e.center?.lat, lo=e.lon??e.center?.lon;
           const name=(isJa()? tg["name:ja"]||tg.name : tg["name:en"]||tg.name)||""; const br=tg["branch:ja"]||tg.branch||"";
           return {name: br && !name.includes(br) ? name+" "+br : name, lat:la, lon:lo}; })
         .filter(x=>x.name && x.lat!=null && !seen.has(x.name) && seen.add(x.name))
         .map(x=>Object.assign(x,{d:distM(lat,lon,x.lat,x.lon)})).sort((a,b)=>a.d-b.d).slice(0,15);
-      nearCache = {at:Date.now(), lat, lon, items};
+      if(items.length) nearCache = {at:Date.now(), lat, lon, items};
     }
-    if(!items.length){ paint(`<div class="note" style="margin:0">${t("nearNone")}</div>${mapsLink(lat,lon)}`); return; }
+    if(!items.length){ paint(`<div class="note" style="margin:0">${t("nearNone",{acc:typeof acc==="number"?acc:"?"})}</div>${mapsLink(lat,lon)}`); return; }
     paint(items.map((x,i)=>`<button class="gymrow" data-near="${i}">${esc(x.name)}<small>${fmtDist(x.d)}</small></button>`).join(""));
     box()?.querySelectorAll("[data-near]").forEach(b=>b.onclick=()=>{
       const x=items[+b.dataset.near]; let g=S.gyms.find(y=>y.name===x.name);
@@ -585,7 +587,7 @@ async function showNearby(force){
     });
   }catch(e){
     const pos = e && (e.code===1||e.code===2||e.code===3);
-    paint(`<div class="note" style="margin:0">${e&&e.code===1 ? t("nearDenied") : pos ? t("nearNoPos") : t("nearErr")+(e&&e.message?` <span style="opacity:.6">(${esc(e.message)})</span>`:"")}</div><button class="btn" id="nearAgain">${t("nearRetry")}</button>${mapsLink()}`);
+    paint(`<div class="note" style="margin:0">${e&&e.code===1 ? t("nearDenied") : pos ? t("nearNoPos") : e&&e.slow ? t("nearSlow") : t("nearErr")+(e&&e.message?` <span style="opacity:.6">(${esc(e.message)})</span>`:"")}</div><button class="btn" id="nearAgain">${t("nearRetry")}</button>${mapsLink()}`);
     const a=sheet.querySelector("#nearAgain"); if(a) a.onclick=()=>showNearby(true);
   }
 }
