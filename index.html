@@ -38,9 +38,9 @@ h1{font-family:var(--display);font-weight:400;font-size:30px;letter-spacing:.02e
 /* entry screen */
 .entry{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
 .entry svg.hero{position:absolute;inset:0;width:100%;height:100%}
-.entry .content{position:relative;height:100%;padding:env(safe-area-inset-top,0px) max(24px,env(safe-area-inset-right,0px)) calc(28px + env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px;max-width:560px;width:100%;align-self:center;box-sizing:border-box}
+.entry .content{position:relative;height:100%;justify-content:flex-end;padding:env(safe-area-inset-top,0px) max(24px,env(safe-area-inset-right,0px)) calc(28px + env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px;max-width:560px;width:100%;align-self:center;box-sizing:border-box}
 .entry .brand{font-family:var(--display);font-size:64px;line-height:.9;letter-spacing:.02em;margin:0}
-.entry .brandbox{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:150px}
+.entry .brandbox{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:150px}
 .entry .brand{font-size:clamp(56px,19vw,96px);position:relative;z-index:1;white-space:nowrap;display:flex;align-items:flex-start;gap:.42em}
 .entry .brand .bs{margin-top:.5em}
 .entry .brand .bm{color:#c9b6ff;text-shadow:0 0 24px rgba(139,92,246,.8)}
@@ -49,13 +49,14 @@ h1{font-family:var(--display);font-weight:400;font-size:30px;letter-spacing:.02e
 .entry .bsub i{font-style:normal;opacity:.6}
 .entry .lede{color:#cfc6e2;font-size:15px;margin:0}
 .entry .who{font-size:13px;color:var(--muted)}
-.entry .go{height:60px;border-radius:16px;background:var(--violet);color:var(--violet-ink);font-size:18px;font-weight:800;letter-spacing:.06em;box-shadow:var(--glow)}
+.entry .go{height:54px;border-radius:16px;background:var(--violet);color:var(--violet-ink);font-size:18px;font-weight:800;letter-spacing:.06em;box-shadow:var(--glow)}
 .entry .go:active{transform:scale(.985)}
-.ob{display:flex;flex-direction:column;gap:10px}
-.ob input{height:56px;border-radius:14px;background:rgba(20,17,25,.85);border:1px solid var(--line);padding:0 16px;font-size:18px;font-weight:600;color:var(--ink);box-sizing:border-box;width:100%;min-width:0}
+.ob{display:flex;flex-direction:column;gap:8px}
+.ob .seg button{padding:7px}
+.ob input{height:46px;border-radius:12px;background:rgba(20,17,25,.85);border:1px solid var(--line);padding:0 14px;font-size:16px;font-weight:600;color:var(--ink);box-sizing:border-box;width:100%;min-width:0}
 .ob input:focus{border-color:var(--violet)}
 .ob .bwrow{position:relative}
-.ob .bwrow span{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--muted);font-family:var(--num);font-size:20px}
+.ob .bwrow span{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-family:var(--num);font-size:17px}
 .ob .seg{background:rgba(20,17,25,.85);border:1px solid var(--line);align-self:flex-start}
 .modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .modes .go{display:flex;align-items:center;justify-content:center;gap:8px}
@@ -80,7 +81,7 @@ h1{font-family:var(--display);font-weight:400;font-size:30px;letter-spacing:.02e
 .ob .two2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
 .ob #obSex{align-self:stretch}
 .birth{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr);gap:8px}
-.birth select{height:50px;border-radius:12px;background:rgba(20,17,25,.85);border:1px solid var(--line);padding:0 10px;font-size:16px;font-weight:600;color:var(--ink);min-width:0;width:100%}
+.birth select{height:44px;border-radius:12px;background:rgba(20,17,25,.85);border:1px solid var(--line);padding:0 10px;font-size:16px;font-weight:600;color:var(--ink);min-width:0;width:100%}
 .card .birth select{background:var(--bg)}
 .entry .hello{font-size:17px;font-weight:700;color:#e4dcf5}
 .gymrow{display:flex;align-items:center;gap:10px;padding:13px 12px;border-radius:12px;background:var(--surface2);width:100%;text-align:left;font-weight:650;font-size:16px}
@@ -310,8 +311,8 @@ body.mode-sauna .tabs button.on svg{filter:drop-shadow(0 0 6px rgba(214,51,108,.
     </defs>
     <rect id="hBg" fill="#08070b"/>
     <polygon id="hTop" fill="url(#gm)"/><polygon id="hBot" fill="url(#gs)"/>
-    <g clip-path="url(#cTop)"><use id="iDb" href="#mDumbbell" stroke="#c9b6ff" opacity=".28"/></g>
-    <g clip-path="url(#cBot)"><use id="iOn" href="#mOnsen" stroke="#ff9fc0" opacity=".28"/></g>
+    <g clip-path="url(#cTop)"><use id="iDb" href="#mDumbbell" stroke="#c9b6ff" opacity=".2"/></g>
+    <g clip-path="url(#cBot)"><use id="iOn" href="#mOnsen" stroke="#ff9fc0" opacity=".2"/></g>
     <line id="hGlow" stroke="#fff" stroke-width="10" opacity=".25" filter="url(#glow)"/>
     <line id="hLine" stroke="#fff" stroke-width="2.5" opacity=".85"/>
     <rect id="hGrain" filter="url(#grain)"/>
@@ -1077,7 +1078,7 @@ function renderSettings(){
       <textarea id="imp" placeholder="${esc(t("pastePh"))}"></textarea>
       <div class="row" style="margin-top:8px"><button class="btn" data-act="import">${t("load")}</button></div>
     </div></div>
-    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261019-0231</p>`;
+    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261019-0235</p>`;
 }
 
 // ---------- tick ----------
@@ -1201,6 +1202,9 @@ const SLOPE = 0.45; // horizontal run per unit of height for the diagonal
 function drawHero(){
   const svg=document.getElementById("hero"), W=svg.clientWidth, H=svg.clientHeight; if(!W||!H||entry.hidden) return;
   svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  const bb=document.querySelector(".brandbox"), ctl=document.getElementById(S.settings.nick?"entryMain":"onboard").getBoundingClientRect();
+  bb.style.top=""; const bh=bb.getBoundingClientRect().height, maxTop=ctl.top-svg.getBoundingClientRect().top-16-bh;
+  if(H/2-bh/2 > maxTop) bb.style.top=Math.max(8,maxTop+bh/2)+"px";
   const set=(id,a)=>{ const el=document.getElementById(id); for(const k in a) el.setAttribute(k,a[k]); };
   const g=document.querySelector("#brand .bm").getBoundingClientRect(), sa=document.querySelector("#brand .bs").getBoundingClientRect(), r=svg.getBoundingClientRect();
   // a point midway between GYM's lower right corner and SAUNA's upper left corner
@@ -1211,12 +1215,10 @@ function drawHero(){
   const pt=`0,0 ${xt},0 ${xb},${H} 0,${H}`, pb=`${xt},0 ${xt+3*W},0 ${xb+3*W},${H} ${xb},${H}`;
   set("hTop",{points:pt}); set("cTopP",{points:pt}); set("hBot",{points:pb}); set("cBotP",{points:pb});
   ["hLine","hGlow"].forEach(id=>set(id,{x1:xt,y1:0,x2:xb,y2:H}));
-  // the marks sit large behind the words: a dumbbell behind GYM, the hot-spring mark behind SAUNA
-  const behind=(id, rc, k, rot)=>{ const sz=Math.max(rc.width, rc.height)*k, x=(rc.left+rc.right)/2-r.left-sz/2, y=(rc.top+rc.bottom)/2-r.top-sz/2;
-    set(id,{transform:`translate(${x},${y}) scale(${sz/100})${rot?` rotate(${rot} 50 50)`:""}`}); };
-  // the dumbbell leans parallel to the line so it can be large and still stay on the purple side
-  const gy=(g.top+g.bottom)/2-r.top, dsz=g.width*1.8, gmid=(cx+(cy-gy)*SLOPE)-dsz*.27, dw=g.width*.5;
-  behind("iDb", {left:gmid-dw+r.left, right:gmid+dw+r.left, top:g.top-dsz*.08, bottom:g.bottom-dsz*.08, width:g.width, height:g.height}, 1.8, -Math.atan(1/SLOPE)*180/Math.PI); behind("iOn", sa, 1.45, 0);
+  // the marks fill each side as large background shapes; the dumbbell leans parallel to the line
+  const lineX=y=>cx+(cy-y)*SLOPE, place=(id,x,y,sz,rot)=>set(id,{transform:`translate(${x-sz/2},${y-sz/2}) scale(${sz/100})${rot?` rotate(${rot} 50 50)`:""}`});
+  const dy=H*.26, dsz=Math.min(H*.42, W*.95); place("iDb", lineX(dy)*.46, dy, dsz, -Math.atan(1/SLOPE)*180/Math.PI);
+  const oy=H*.7, osz=Math.min(W*1.0, H*.5); place("iOn", (lineX(oy)+W)/2+W*.04, oy, osz, 0);
 }
 addEventListener("resize", drawHero);
 function birthSel(id, val){
