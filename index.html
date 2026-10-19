@@ -523,7 +523,7 @@ try{
   const raw = localStorage.getItem(LS);
   if(raw){ const p = JSON.parse(raw); const b=blank(); S = Object.assign(b, p);
     const have = new Set(S.exercises.map(e=>e.id));
-    b.exercises.forEach(e=>{ if(!have.has(e.id)) S.exercises.push(e); });
+    blank().exercises.forEach(e=>{ if(!have.has(e.id)) S.exercises.push(e); }); // b.exercises was overwritten by the stored list
     S.settings = Object.assign({rest:90, autoCal:true, lang:null}, S.settings||{}); S.sessions = S.sessions||[]; S.gyms = S.gyms||[]; S.saunas = S.saunas||[];
     S.timer = S.timer||{phase:"idle"}; S.last = S.last||{}; S.deleted = S.deleted||[];
   }
@@ -1100,7 +1100,7 @@ function renderSettings(){
       <textarea id="imp" placeholder="${esc(t("pastePh"))}"></textarea>
       <div class="row" style="margin-top:8px"><button class="btn" data-act="import">${t("load")}</button></div>
     </div></div>
-    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261019-0504</p>`;
+    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261019-0553</p>`;
 }
 
 // ---------- tick ----------
