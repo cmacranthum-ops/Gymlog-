@@ -501,7 +501,7 @@ const DEFAULT_EX = [
   ["baseball","野球","Baseball","field","フィールド"],["volleyball","バレーボール","Volleyball","field","フィールド"],["rugby","ラグビー","Rugby","field","フィールド"],["handball","ハンドボール","Handball","field","フィールド"],
   ["badminton","バドミントン","Badminton","field","フィールド"],["tabletennis","卓球","Table tennis","field","フィールド"],["golf","ゴルフ","Golf","field","フィールド"],["cycling","サイクリング","Cycling","field","フィールド"],
   ["jumprope","縄跳び","Jump rope","field","フィールド"],["hiking","ハイキング","Hiking","field","フィールド"],["swimming","水泳","Swimming","field","フィールド"],
-  ["feelcycle","FEELCYCLE（暗闇バイク）","FEELCYCLE (indoor cycling)","fit","フィットネス"],["bmonster","b-monster（暗闇ボクシング）","b-monster (boxing)","fit","フィットネス"],["lava","LAVA（ホットヨガ）","LAVA (hot yoga)","fit","フィットネス"],["caldo","カルド（ホットヨガ）","Caldo (hot yoga)","fit","フィットネス"],["zenplace","zen place（ピラティス）","zen place (Pilates)","fit","フィットネス"],["pilatesk","ピラティスK","Pilates K","fit","フィットネス"],["curves","カーブス","Curves","fit","フィットネス"],["rizap","パーソナルトレーニング（RIZAP など）","Personal training (RIZAP etc.)","fit","フィットネス"],["bodypump","BODYPUMP（レズミルズ）","BODYPUMP (Les Mills)","fit","フィットネス"],["bodycombat","BODYCOMBAT（レズミルズ）","BODYCOMBAT (Les Mills)","fit","フィットネス"],["zumba","ZUMBA","Zumba","fit","フィットネス"],["crossfit","クロスフィット","CrossFit","fit","フィットネス"],["hiit","HIIT・ブートキャンプ","HIIT / boot camp","fit","フィットネス"],["spinning","スピニング・バイク","Spinning","fit","フィットネス"],["kickbox","キックボクシング","Kickboxing","fit","フィットネス"],["aerobics","エアロビクス","Aerobics","fit","フィットネス"],["aquabics","アクアビクス","Aqua aerobics","fit","フィットネス"],["yoga","ヨガ","Yoga","fit","フィットネス"],["pilates","ピラティス","Pilates","fit","フィットネス"]
+  ["feelcycle","FEELCYCLE（暗闇バイク）","FEELCYCLE (indoor cycling)","fit","フィットネス"],["bmonster","b-monster（暗闇ボクシング）","b-monster (boxing)","fit","フィットネス"],["burness","Burness Style（暗闇キックボクシング）","Burness Style (kickboxing)","fit","フィットネス"],["lava","LAVA（ホットヨガ）","LAVA (hot yoga)","fit","フィットネス"],["caldo","カルド（ホットヨガ）","Caldo (hot yoga)","fit","フィットネス"],["zenplace","zen place（ピラティス）","zen place (Pilates)","fit","フィットネス"],["pilatesk","ピラティスK","Pilates K","fit","フィットネス"],["curves","カーブス","Curves","fit","フィットネス"],["rizap","パーソナルトレーニング（RIZAP など）","Personal training (RIZAP etc.)","fit","フィットネス"],["bodypump","BODYPUMP（レズミルズ）","BODYPUMP (Les Mills)","fit","フィットネス"],["bodycombat","BODYCOMBAT（レズミルズ）","BODYCOMBAT (Les Mills)","fit","フィットネス"],["zumba","ZUMBA","Zumba","fit","フィットネス"],["crossfit","クロスフィット","CrossFit","fit","フィットネス"],["hiit","HIIT・ブートキャンプ","HIIT / boot camp","fit","フィットネス"],["spinning","スピニング・バイク","Spinning","fit","フィットネス"],["kickbox","キックボクシング","Kickboxing","fit","フィットネス"],["aerobics","エアロビクス","Aerobics","fit","フィットネス"],["aquabics","アクアビクス","Aqua aerobics","fit","フィットネス"],["yoga","ヨガ","Yoga","fit","フィットネス"],["pilates","ピラティス","Pilates","fit","フィットネス"]
 ];
 const CAT_ICON = {
   free:'<svg viewBox="0 0 24 24"><rect x="3.5" y="7" width="3" height="10" rx="1"/><rect x="17.5" y="7" width="3" height="10" rx="1"/><path d="M1.5 10v4M22.5 10v4M6.5 12h11"/></svg>',
@@ -683,8 +683,8 @@ const MET_STRENGTH = 3.5; // resistance training, general: gym time that isn't c
 const MET_CARDIO = {treadmill:6.0, bike:7.0, elliptical:5.0, rowing:7.0, stairs:9.0,
   running:9.8, jogging:7.0, walking:3.5, sprint:10.0, soccer:7.0, futsal:7.0, basketball:6.5, tennis:7.3, baseball:5.0, volleyball:4.0,
   rugby:8.3, handball:8.0, badminton:5.5, tabletennis:4.0, golf:4.8, cycling:7.5, jumprope:11.8, hiking:6.0, swimming:5.8,
-  feelcycle:8.5, bmonster:7.8, lava:3.5, caldo:3.5, zenplace:3.0, pilatesk:3.0, curves:3.5, rizap:5.0, bodypump:5.0, bodycombat:7.3, zumba:6.5, crossfit:8.0, hiit:8.0, spinning:8.5, kickbox:7.3, aerobics:6.5, aquabics:5.3, yoga:2.5, pilates:3.0};
-const LESSON_MIN = {feelcycle:45, bmonster:45, lava:60, caldo:60, zenplace:50, pilatesk:50, curves:30, rizap:50, bodypump:45, bodycombat:45, zumba:45, crossfit:60, hiit:30, spinning:45, kickbox:45, aerobics:45, aquabics:45, yoga:60, pilates:50};
+  feelcycle:8.5, bmonster:7.8, burness:7.3, lava:3.5, caldo:3.5, zenplace:3.0, pilatesk:3.0, curves:3.5, rizap:5.0, bodypump:5.0, bodycombat:7.3, zumba:6.5, crossfit:8.0, hiit:8.0, spinning:8.5, kickbox:7.3, aerobics:6.5, aquabics:5.3, yoga:2.5, pilates:3.0};
+const LESSON_MIN = {feelcycle:45, bmonster:45, burness:45, lava:60, caldo:60, zenplace:50, pilatesk:50, curves:30, rizap:50, bodypump:45, bodycombat:45, zumba:45, crossfit:60, hiit:30, spinning:45, kickbox:45, aerobics:45, aquabics:45, yoga:60, pilates:50};
 const MET_CARDIO_OTHER = 6.0;
 const bodyKg = ()=> S.settings.bw || 65;
 function ageNow(){ const b=S.settings.birth; if(!b) return null; const [y,m,d]=b.split("-").map(Number), n=new Date(); return n.getFullYear()-y-((n.getMonth()+1<m||(n.getMonth()+1===m&&n.getDate()<d))?1:0); }
@@ -1100,7 +1100,7 @@ function renderSettings(){
       <textarea id="imp" placeholder="${esc(t("pastePh"))}"></textarea>
       <div class="row" style="margin-top:8px"><button class="btn" data-act="import">${t("load")}</button></div>
     </div></div>
-    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261019-0500</p>`;
+    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261019-0504</p>`;
 }
 
 // ---------- tick ----------
