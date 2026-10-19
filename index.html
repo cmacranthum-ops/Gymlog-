@@ -253,7 +253,8 @@ textarea{width:100%;min-height:90px;border-radius:10px;border:1px solid var(--li
 .sheet .resttick{font-size:13px;color:var(--violet-hi);font-weight:700}
 .field{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;color:var(--muted)}
 .field input,.field select{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:11px;font-size:16px;font-weight:500;color:var(--ink)}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.field input{min-width:0;width:100%;box-sizing:border-box}
 .seg{display:flex;background:var(--surface2);border-radius:10px;padding:3px}
 .seg button{flex:1;padding:9px;border-radius:8px;font-weight:700;color:var(--muted)}
 .seg button.on{background:var(--violet-deep);color:var(--ink)}
@@ -347,7 +348,7 @@ const I18N = {
     tabEx:"種目", tabHist:"記録", tabSet:"設定", tabSauna:"サウナ",
     modeGym:"ジム", modeSauna:"サウナ", sauna:"サウナ", saunaQ:"どこのサウナにいますか？", saunaNamePh:"サウナ名を入力してください", saunaNone:"場所未選択", saunaNext:"次回以降は近隣のサウナが自動的に表示されます",
     sTemp:"温度", sMin:"1回の時間", sRounds:"回数", sSave:"記録する", sSaved:"サウナを記録しました", sRecent:"最近のサウナ", sNone:"まだ記録がありません",
-    sLine:"{temp}℃ · {min}分 × {n}回", sDel:"削除", placeSauna:"サウナ",
+    sLine:"{temp}℃ · {min}分 × {n}回", sDel:"削除", placeSauna:"サウナ", sBefore:"入る前の体重", sAfter:"出た後の体重", sOpt:"任意", sweat:"発汗 {g}g", sweatEst:"発汗 約{g}g（推定）", mSKcal:"サウナ消費カロリー", mSweat:"サウナ発汗量", mSVisits:"サウナ回数",
     obName:"ニックネーム", obBw:"体重", obGo:"はじめる", enter:"ジム", hello:"おかえりなさい、{name}さん", nickHead:"ニックネーム",
     exercises:"トレーニング", todaySets:"今日 {n} セット",
     all:"すべて", machine:"マシン", free:"フリーウェイト", noEx:"表示する種目がありません", addEx:"＋ 種目を追加",
@@ -404,7 +405,7 @@ const I18N = {
     tabEx:"Exercises", tabHist:"History", tabSet:"Settings", tabSauna:"Sauna",
     modeGym:"Gym", modeSauna:"Sauna", sauna:"Sauna", saunaQ:"Which sauna are you at?", saunaNamePh:"Enter the sauna name", saunaNone:"No place selected", saunaNext:"Next time, a nearby sauna is picked automatically",
     sTemp:"Temperature", sMin:"Minutes per round", sRounds:"Rounds", sSave:"Save", sSaved:"Sauna logged", sRecent:"Recent sauna visits", sNone:"No records yet",
-    sLine:"{temp}°C · {min} min × {n}", sDel:"Delete", placeSauna:"Sauna",
+    sLine:"{temp}°C · {min} min × {n}", sDel:"Delete", placeSauna:"Sauna", sBefore:"Weight before", sAfter:"Weight after", sOpt:"optional", sweat:"Sweat {g} g", sweatEst:"Sweat ~{g} g (est.)", mSKcal:"Sauna calories", mSweat:"Sauna sweat", mSVisits:"Sauna visits",
     obName:"Nickname", obBw:"Body weight", obGo:"Get started", enter:"Gym", hello:"Welcome back, {name}", nickHead:"Nickname",
     exercises:"Training", todaySets:"{n} sets today",
     all:"All", machine:"Machine", free:"Free weight", noEx:"No exercises to show", addEx:"+ Add exercise",
@@ -862,15 +863,25 @@ function renderEx(){
 // ---------- sauna: place, temperature, minutes per round, rounds ----------
 const sv = ()=> Object.assign({temp:90, min:8, n:3}, S.saunaLast||{});
 const saunaLine = x=> t("sLine",{temp:x.temp, min:x.min, n:x.n});
+// Sauna estimates. Calories: about 1.5 METs while sitting in the heat. Sweat: the weight lost when both weights are entered;
+// otherwise roughly 15 g/min for a 70 kg person at 90 °C, scaled by temperature and body weight (a rough guide only).
+const MET_SAUNA = 1.5;
+const saunaMin = x=> (x.min||0)*(x.n||0);
+const saunaKcal = x=> kcalOf(MET_SAUNA, saunaMin(x)*60);
+const sweatMeasured = x=> x.wb && x.wa && x.wb>x.wa ? Math.round((x.wb-x.wa)*1000) : null;
+const sweatG = x=> sweatMeasured(x) ?? Math.round(15*saunaMin(x)*Math.min(1.4,Math.max(.3,((x.temp||90)-40)/50))*bodyKg()/70);
+const sweatTxt = x=> sweatMeasured(x)!=null ? t("sweat",{g:sweatG(x).toLocaleString()}) : t("sweatEst",{g:sweatG(x).toLocaleString()});
+const saunaSum = x=> sweatTxt(x)+" · "+kcalTxt(saunaKcal(x));
 function renderSauna(){
   const v=sv(); const pl=S.currentSauna&&gymById(S.currentSauna);
   const step=(k,lbl,unit)=>`<div class="pick"><label>${lbl}</label><div class="stepper"><button data-sv="${k}" data-d="-1" aria-label="−">−</button><input id="sv-${k}" inputmode="numeric" value="${v[k]}">${unit?`<span class="unit">${unit}</span>`:""}<button data-sv="${k}" data-d="1" aria-label="+">＋</button></div></div>`;
   const recent=S.saunas.slice().sort((a,b)=>b.t-a.t).slice(0,10);
   app.innerHTML = `<h1>${t("sauna")}</h1><div class="sub">${dayLabel(todayKey())}</div>
     <div class="visit" style="background:linear-gradient(120deg,#3a1d12,#141119);border-color:#6b3420"><div><div class="sub"><b style="color:var(--ink);font-size:16px">${pl?esc(pl.name):t("saunaNone")}</b> · <button class="link" style="padding:0" data-act="saunaplace">${t("gymChange")}</button></div></div></div>
-    <div class="sform">${step("temp",t("sTemp"),"℃")}${step("min",t("sMin"),isJa()?"分":"min")}${step("n",t("sRounds"),isJa()?"回":"")}</div>
+    <div class="sform">${step("temp",t("sTemp"),"℃")}${step("min",t("sMin"),isJa()?"分":"min")}${step("n",t("sRounds"),isJa()?"回":"")}
+      <div class="two"><label class="field">${t("sBefore")}（${t("sOpt")}）<input id="swb" inputmode="decimal" placeholder="kg"></label><label class="field">${t("sAfter")}（${t("sOpt")}）<input id="swa" inputmode="decimal" placeholder="kg"></label></div></div>
     <button class="sbig" data-act="saunasave">${t("sSave")}</button>
-    <div class="sec"><h2>${t("sRecent")}</h2>${recent.map(x=>`<div class="srow"><span class="sub"><b style="color:var(--ink)">${dayLabel(dayKey(x.t))}</b><br>${x.place&&gymById(x.place)?esc(gymById(x.place).name)+" · ":""}${saunaLine(x)}</span><button class="sbtn danger" data-sdel="${x.id}">${view.confirmSauna===x.id?t("reallyDel"):t("sDel")}</button></div>`).join("")||`<div class="empty">${t("sNone")}</div>`}</div>`;
+    <div class="sec"><h2>${t("sRecent")}</h2>${recent.map(x=>`<div class="srow"><span class="sub"><b style="color:var(--ink)">${dayLabel(dayKey(x.t))}</b><br>${x.place&&gymById(x.place)?esc(gymById(x.place).name)+" · ":""}${saunaLine(x)}<br>${saunaSum(x)}</span><button class="sbtn danger" data-sdel="${x.id}">${view.confirmSauna===x.id?t("reallyDel"):t("sDel")}</button></div>`).join("")||`<div class="empty">${t("sNone")}</div>`}</div>`;
 }
 function readSauna(){ const v=sv(); for(const k of ["temp","min","n"]){ const x=parseInt(document.getElementById("sv-"+k)?.value,10); if(!isNaN(x)&&x>=0) v[k]=x; } return v; }
 function histListHTML(){
@@ -888,7 +899,7 @@ function histListHTML(){
         ${visits.map(x=>`<div class="vrow"><span>${gymName(x)?esc(gymName(x))+" · ":""}${t("stay")} <b class="num">${clock(x.start)}–${clock(x.end)}</b>（${fmtHM(x.end-x.start)}）${x.closed?"":t("staying")} · ${kcalTxt(sessionKcal(x))}</span>
           ${x.closed?(x.cal?`<span class="calok">${t("calDone")}</span>`:`<button class="sbtn" data-cal="${x.id}">${t("calAdd")}</button>`):""}</div>
           ${x.closed&&!x.cal&&calFail[x.id]?`<p class="note">${esc(calFail[x.id])} <a href="${calLink(x)}" target="_blank" rel="noopener">${t("calOpen")}</a></p>`:""}`).join("")}
-        ${(sByDay[k]||[]).map(x=>`<div class="vrow"><span>${t("sauna")}${x.place&&gymById(x.place)?" · "+esc(gymById(x.place).name):""} <b class="num">${saunaLine(x)}</b></span></div>`).join("")}
+        ${(sByDay[k]||[]).map(x=>`<div class="vrow"><span>${t("sauna")}${x.place&&gymById(x.place)?" · "+esc(gymById(x.place).name):""} <b class="num">${saunaLine(x)}</b> · ${saunaSum(x)}</span></div>`).join("")}
         <dl class="dl">${groups.map(g=>`<dt>${esc(exName(exById(g.ex)))}</dt><dd>${setsTxt(g.sets)}　<span class="sc">${t("setsN",{n:g.sets.length})}</span></dd>`).join("")}</dl></div>`;
     }).join("") || `<div class="card empty">${t("noHist")}</div>`}
     ${days.length>limit?`<button class="btn" style="width:100%" data-act="more">${t("more")}</button>`:""}</div>`;
@@ -903,7 +914,7 @@ function nextBucket(b, unit){ const d=new Date(b); if(unit==="day") d.setDate(d.
 function chartRange(){
   const to=Date.now(); let from;
   if(hist.period) from = startOfDay(to-(hist.period-1)*DAY);
-  else { from = to; for(const s of S.sets) if(s.t<from) from=s.t; for(const x of S.sessions) if(x.start<from) from=x.start; from=startOfDay(from); }
+  else { from = to; for(const s of S.sets) if(s.t<from) from=s.t; for(const x of S.sessions) if(x.start<from) from=x.start; for(const x of S.saunas) if(x.t<from) from=x.t; from=startOfDay(from); }
   const span=(to-from)/DAY;
   return {from, to, span, unit: span<=45?"day" : span<=200?"week" : "month"};
 }
@@ -950,7 +961,7 @@ function chartHTML(){
   const r=chartRange(); const used=new Set(S.sets.map(s=>s.sid));
   const visits=S.sessions.filter(x=>used.has(x.id));
   const per=[[30,"p30"],[90,"p90"],[365,"p365"],[0,"pAll"]];
-  const mets={ex:"mEx",vol:"mVol",kcal:"mKcal",stay:"mStay",visits:"mVisits",parts:"mParts",cardio:"mCardio"};
+  const mets={ex:"mEx",vol:"mVol",kcal:"mKcal",stay:"mStay",visits:"mVisits",parts:"mParts",cardio:"mCardio",skcal:"mSKcal",sweat:"mSweat",svisits:"mSVisits"};
   const unitTxt={day:t("perDay"),week:t("perWeek"),month:t("perMonth")}[r.unit];
   const inR=ts=>ts>=r.from&&ts<=r.to;
   let sel="", summary="", chart="", legend="", note="";
@@ -977,6 +988,11 @@ function chartHTML(){
     pts.forEach(p=>p.v/=60000); bars(pts,v=>fmtHM(v*60000),t("sumTotal",{v:fmtHM(tot)})+" · "+t("sumAvg",{v:fmtHM(tot/Math.max(1,n))})); }
   else if(m==="visits"){ const pts=perBucket(r,visits,x=>x.start,()=>1); const n=pts.reduce((a,p)=>a+p.v,0); bars(pts,v=>t("visitsN",{n:v}),t("sumVisits",{n, w:(n/Math.max(1,(r.to-r.from)/DAY/7)).toFixed(1)})); }
   else if(m==="cardio"){ const pts=perBucket(r,S.sets.filter(s=>isCardio(exById(s.ex))),s=>s.t,s=>(s.d||0)/60); bars(pts,v=>Math.round(v)+t("cMin"),t("sumTotal",{v:Math.round(pts.reduce((a,p)=>a+p.v,0))+t("cMin")})); }
+  else if(m==="skcal"){ const pts=perBucket(r,S.saunas,x=>x.t,saunaKcal); const n=S.saunas.filter(x=>inR(x.t)).length, tot=pts.reduce((a,p)=>a+p.v,0);
+    if(bars(pts,v=>kcalTxt(v),t("sumTotal",{v:kcalTxt(tot)})+" · "+t("sumAvg",{v:kcalTxt(tot/Math.max(1,n))}))) note=t("bwNote")+"<br>"+note; }
+  else if(m==="sweat"){ const pts=perBucket(r,S.saunas,x=>x.t,sweatG); const n=S.saunas.filter(x=>inR(x.t)).length, tot=pts.reduce((a,p)=>a+p.v,0), g=v=>Math.round(v).toLocaleString()+"g";
+    bars(pts,g,t("sumTotal",{v:g(tot)})+" · "+t("sumAvg",{v:g(tot/Math.max(1,n))})); }
+  else if(m==="svisits"){ const pts=perBucket(r,S.saunas,x=>x.t,()=>1); const n=pts.reduce((a,p)=>a+p.v,0); bars(pts,v=>t("visitsN",{n:v}),t("sumVisits",{n, w:(n/Math.max(1,(r.to-r.from)/DAY/7)).toFixed(1)})); }
   else if(m==="parts"){
     const c={}; for(const s of S.sets){ const e=exById(s.ex); if(!e||isCardio(e)||!inR(s.t)) continue; c[e.part]=(c[e.part]||0)+1; }
     const rows=Object.entries(c).sort((a,b)=>b[1]-a[1]); const mx=rows.length?rows[0][1]:1;
@@ -1032,7 +1048,7 @@ function renderSettings(){
       <textarea id="imp" placeholder="${esc(t("pastePh"))}"></textarea>
       <div class="row" style="margin-top:8px"><button class="btn" data-act="import">${t("load")}</button></div>
     </div></div>
-    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261019-0205</p>`;
+    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261019-0207</p>`;
 }
 
 // ---------- tick ----------
@@ -1228,7 +1244,9 @@ app.addEventListener("click", ev=>{
     case "endgym": endGym(); break;
     case "gym": askGym(); break;
     case "saunaplace": askGym("sauna"); break;
-    case "saunasave": { const v=readSauna(); S.saunaLast=v; S.saunas.push({id:uid(), t:Date.now(), place:S.currentSauna||null, temp:v.temp, min:v.min, n:v.n, u:Date.now()}); save({}); render(); toast(t("sSaved")+" · "+saunaLine(v)); break; }
+    case "saunasave": { const v=readSauna(); S.saunaLast=v; const kg=id=>{ const w=parseFloat(document.getElementById(id)?.value); return !isNaN(w)&&w>=20&&w<=300? Math.round(w*10)/10 : null; };
+      const x={id:uid(), t:Date.now(), place:S.currentSauna||null, temp:v.temp, min:v.min, n:v.n, wb:kg("swb"), wa:kg("swa"), u:Date.now()};
+      S.saunas.push(x); save({}); render(); toast(t("sSaved")+" · "+saunaSum(x)); break; }
     case "autocal": S.settings.autoCal=!S.settings.autoCal; save({}); render(); break;
     case "step": { const v=vals(view.ex); const steps=[1,1.25,2.5,5]; const i=steps.indexOf(v.step); setVals(view.ex,{step:steps[(i+1)%steps.length]}); renderEx(); tick(); break; }
     case "add": addExercise(); break;
