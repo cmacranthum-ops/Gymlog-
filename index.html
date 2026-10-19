@@ -41,11 +41,11 @@ h1{font-family:var(--display);font-weight:400;font-size:30px;letter-spacing:.02e
 .entry .content{position:relative;height:100%;padding:env(safe-area-inset-top,0px) max(24px,env(safe-area-inset-right,0px)) calc(28px + env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px;max-width:560px;width:100%;align-self:center;box-sizing:border-box}
 .entry .brand{font-family:var(--display);font-size:64px;line-height:.9;letter-spacing:.02em;margin:0}
 .entry .brandbox{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:150px}
-.entry .brand{font-size:clamp(48px,15vw,66px);white-space:nowrap;display:flex;align-items:flex-start;gap:.42em}
+.entry .brand{font-size:clamp(56px,19vw,96px);position:relative;z-index:1;white-space:nowrap;display:flex;align-items:flex-start;gap:.42em}
 .entry .brand .bs{margin-top:.5em}
 .entry .brand .bm{color:#c9b6ff;text-shadow:0 0 24px rgba(139,92,246,.8)}
 .entry .brand .bs{color:#ff8fb4;text-shadow:0 0 24px rgba(214,51,108,.8)}
-.entry .bsub{margin-top:0;transform:translateX(3.6em);text-shadow:0 1px 6px #000;font-size:13px;font-weight:700;letter-spacing:.25em;color:#cfc6e2}
+.entry .bsub{margin-top:0;font-size:15px;position:relative;z-index:1;transform:translateX(3.6em);text-shadow:0 1px 6px #000;font-size:13px;font-weight:700;letter-spacing:.25em;color:#cfc6e2}
 .entry .bsub i{font-style:normal;opacity:.6}
 .entry .lede{color:#cfc6e2;font-size:15px;margin:0}
 .entry .who{font-size:13px;color:var(--muted)}
@@ -302,17 +302,16 @@ body.mode-sauna .tabs button.on svg{filter:drop-shadow(0 0 6px rgba(214,51,108,.
       <radialGradient id="gm" cx="15%" cy="12%" r="85%"><stop offset="0" stop-color="#6d3df2" stop-opacity=".85"/><stop offset=".55" stop-color="#22104f" stop-opacity=".75"/><stop offset="1" stop-color="#08070b"/></radialGradient>
       <radialGradient id="gs" cx="85%" cy="88%" r="85%"><stop offset="0" stop-color="#d6336c" stop-opacity=".85"/><stop offset=".55" stop-color="#5c1238" stop-opacity=".8"/><stop offset="1" stop-color="#12060c"/></radialGradient>
       <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .07 0"/></filter>
+      <clipPath id="cTop"><polygon id="cTopP"/></clipPath><clipPath id="cBot"><polygon id="cBotP"/></clipPath>
       <filter id="glow"><feGaussianBlur stdDeviation="6"/></filter>
-      <!-- dumbbell, ball and hot-spring mark, drawn on a 100x100 grid -->
+      <!-- dumbbell and hot-spring mark, drawn on a 100x100 grid -->
       <g id="mDumbbell" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><rect x="12" y="28" width="12" height="44" rx="3"/><rect x="76" y="28" width="12" height="44" rx="3"/><path d="M24 50h52M2 50h10M88 50h10"/></g>
-      <g id="mBall" fill="none" stroke-width="5" stroke-linejoin="round"><circle cx="50" cy="50" r="44"/><path d="M50 30l19 14-7 22H38l-7-22z"/><path d="M50 6v24M69 44l23-8M62 66l14 20M38 66L24 86M31 44L8 36"/></g>
       <g id="mOnsen" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 62a36 18 0 1 0 72 0"/><path d="M14 62c8-5 14-5 14-5M86 62c-8-5-14-5-14-5"/><path d="M34 46c-8-9 8-13 0-22s4-14 4-14M50 46c-8-9 8-13 0-22s4-14 4-14M66 46c-8-9 8-13 0-22s4-14 4-14"/></g>
     </defs>
     <rect id="hBg" fill="#08070b"/>
     <polygon id="hTop" fill="url(#gm)"/><polygon id="hBot" fill="url(#gs)"/>
-    <use id="iDb" href="#mDumbbell" stroke="#c9b6ff" opacity=".5"/>
-    <use id="iBall" href="#mBall" stroke="#c9b6ff" opacity=".35"/>
-    <use id="iOn" href="#mOnsen" stroke="#ff9fc0" opacity=".5"/>
+    <g clip-path="url(#cTop)"><use id="iDb" href="#mDumbbell" stroke="#c9b6ff" opacity=".28"/></g>
+    <g clip-path="url(#cBot)"><use id="iOn" href="#mOnsen" stroke="#ff9fc0" opacity=".28"/></g>
     <line id="hGlow" stroke="#fff" stroke-width="10" opacity=".25" filter="url(#glow)"/>
     <line id="hLine" stroke="#fff" stroke-width="2.5" opacity=".85"/>
     <rect id="hGrain" filter="url(#grain)"/>
@@ -1078,7 +1077,7 @@ function renderSettings(){
       <textarea id="imp" placeholder="${esc(t("pastePh"))}"></textarea>
       <div class="row" style="margin-top:8px"><button class="btn" data-act="import">${t("load")}</button></div>
     </div></div>
-    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261019-0218</p>`;
+    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261019-0231</p>`;
 }
 
 // ---------- tick ----------
@@ -1209,15 +1208,15 @@ function drawHero(){
   const xt=cx+cy*SLOPE, xb=cx-(H-cy)*SLOPE;
   ["hBg","hGrain"].forEach(id=>set(id,{width:W,height:H}));
   // the purple side is left of the line, the magenta side right of it (overflow is clipped)
-  set("hTop",{points:`0,0 ${xt},0 ${xb},${H} 0,${H}`}); set("hBot",{points:`${xt},0 ${xt+3*W},0 ${xb+3*W},${H} ${xb},${H}`});
+  const pt=`0,0 ${xt},0 ${xb},${H} 0,${H}`, pb=`${xt},0 ${xt+3*W},0 ${xb+3*W},${H} ${xb},${H}`;
+  set("hTop",{points:pt}); set("cTopP",{points:pt}); set("hBot",{points:pb}); set("cBotP",{points:pb});
   ["hLine","hGlow"].forEach(id=>set(id,{x1:xt,y1:0,x2:xb,y2:H}));
-  // gym marks in the free space above GYM, the hot-spring mark below SAUNA
-  const room=g.top-r.top-24, sz=Math.max(40,Math.min(W*.3, room*.62)), y0=Math.max(12,(room-sz)/2);
-  const lineX=y=>cx+(cy-y)*SLOPE;
-  set("iDb",{transform:`translate(${W*.07},${y0}) rotate(-18 50 50) scale(${sz/100})`.replace("rotate(-18 50 50) scale","scale")+` rotate(-18 50 50)`});
-  const bs=sz*.62, bx=Math.min(W*.07+sz*1.1, lineX(y0+sz)-bs-14);
-  set("iBall",{transform:`translate(${bx},${y0+sz*.3}) scale(${bs/100})`});
-  const on=sz*.9, oy=document.getElementById("bsub").getBoundingClientRect().bottom-r.top+18; set("iOn",{transform:`translate(${Math.max(lineX(oy+on)+16, W-on-W*.07)},${oy}) scale(${on/100})`});
+  // the marks sit large behind the words: a dumbbell behind GYM, the hot-spring mark behind SAUNA
+  const behind=(id, rc, k, rot)=>{ const sz=Math.max(rc.width, rc.height)*k, x=(rc.left+rc.right)/2-r.left-sz/2, y=(rc.top+rc.bottom)/2-r.top-sz/2;
+    set(id,{transform:`translate(${x},${y}) scale(${sz/100})${rot?` rotate(${rot} 50 50)`:""}`}); };
+  // the dumbbell leans parallel to the line so it can be large and still stay on the purple side
+  const gy=(g.top+g.bottom)/2-r.top, dsz=g.width*1.8, gmid=(cx+(cy-gy)*SLOPE)-dsz*.27, dw=g.width*.5;
+  behind("iDb", {left:gmid-dw+r.left, right:gmid+dw+r.left, top:g.top-dsz*.08, bottom:g.bottom-dsz*.08, width:g.width, height:g.height}, 1.8, -Math.atan(1/SLOPE)*180/Math.PI); behind("iOn", sa, 1.45, 0);
 }
 addEventListener("resize", drawHero);
 function birthSel(id, val){
