@@ -1082,7 +1082,7 @@ function renderSettings(){
       <textarea id="imp" placeholder="${esc(t("pastePh"))}"></textarea>
       <div class="row" style="margin-top:8px"><button class="btn" data-act="import">${t("load")}</button></div>
     </div></div>
-    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261019-0355</p>`;
+    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261019-0357</p>`;
 }
 
 // ---------- tick ----------
@@ -1211,10 +1211,19 @@ function drawHero(){
   const bh=bb.getBoundingClientRect().height, maxMid=ctl.top-svg.getBoundingClientRect().top-16-bh/2;
   bb.style.top=Math.max(8+bh/2, Math.min(H*.57, maxMid))+"px";
   const set=(id,a)=>{ const el=document.getElementById(id); for(const k in a) el.setAttribute(k,a[k]); };
-  const g=document.querySelector("#brand .bm").getBoundingClientRect(), sa=document.querySelector("#brand .bs").getBoundingClientRect(), r=svg.getBoundingClientRect();
-  // the line always crosses the centre of the screen; the title slides sideways so the gap between GYM and SAUNA sits on it
-  const cx=W/2, cy=H/2, br=document.getElementById("brand");
-  br.style.transform=""; { const gx=(g.right+sa.left)/2-r.left, gy=(g.top+g.bottom)/2-r.top; br.style.transform=`translateX(${cx+(cy-gy)*SLOPE-gx}px)`; }
+  const br=document.getElementById("brand"), bmEl=br.querySelector(".bm"), bsEl=br.querySelector(".bs"), r=svg.getBoundingClientRect(), cx=W/2, cy=H/2;
+  let g, sa; br.style.fontSize="";
+  // the slanted line needs a gap as wide as its run across the letter height plus a margin each side;
+  // the title slides sideways so that gap sits on the line (which always crosses the screen centre), shrinking if it would leave the screen
+  for(let i=0;i<6;i++){
+    br.style.transform=""; br.style.gap=(bmEl.getBoundingClientRect().height*.8*SLOPE+20)+"px";
+    g=bmEl.getBoundingClientRect(); sa=bsEl.getBoundingClientRect();
+    const gx=(g.right+sa.left)/2-r.left, gy=(g.top+g.bottom)/2-r.top, dx=cx+(cy-gy)*SLOPE-gx;
+    br.style.transform=`translateX(${dx}px)`;
+    if(g.left+dx-r.left>=8 && sa.right+dx-r.left<=W-8) break;
+    br.style.fontSize=parseFloat(getComputedStyle(br).fontSize)*.92+"px";
+  }
+  g=bmEl.getBoundingClientRect(); sa=bsEl.getBoundingClientRect();
   // slide the tagline so its middle word ("と" / "&") sits on the line
   const bs=document.getElementById("bsub"), tm=document.getElementById("tagMid");
   if(bs&&tm){ bs.style.transform=""; const m=tm.getBoundingClientRect(), my=(m.top+m.bottom)/2-r.top, want=cx+(cy-my)*SLOPE;
