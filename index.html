@@ -129,6 +129,11 @@ h1{font-family:var(--display);font-weight:400;font-size:30px;letter-spacing:.02e
 .k-machine{--c1:#8fb3ff;--c2:rgba(80,120,255,.3)}
 .k-cardio{--c1:#ff7aa8;--c2:rgba(236,79,134,.3)}
 .k-field{--c1:#6fe0b0;--c2:rgba(60,200,140,.28)}
+.k-fit{--c1:#ffc46b;--c2:rgba(255,170,60,.28)}
+.cats .cat:nth-child(5){grid-column:1/-1;min-height:96px;flex-direction:row;align-items:center;justify-content:flex-start;gap:14px}
+.lessons{margin-top:12px;text-align:center}
+.lessons .lbl{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.lessons .chips{justify-content:center}
 .crumb{display:flex;align-items:center;gap:10px;margin-top:12px}
 .crumb .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;border:1px solid var(--c1)}
 .crumb .ic svg{width:20px;height:20px;fill:none;stroke:var(--c1);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -140,6 +145,7 @@ h1{font-family:var(--display);font-weight:400;font-size:30px;letter-spacing:.02e
 .partbtn .pm{font-size:12px;color:var(--muted)}
 .tag.cardio{background:var(--pink)}
 .tag.field{display:inline-block;background:#6fe0b0}
+.tag.fit{display:inline-block;background:#ffc46b}
 /* exercise screen */
 .topbar{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .back{padding:8px 10px 8px 0;color:var(--violet-hi);font-weight:600;font-size:15px}
@@ -402,7 +408,7 @@ const I18N = {
     calNoEnv:"ここではカレンダーに接続できません。", calNoCap:"カレンダー連携が使えない状態です。", calNotConn:"Googleカレンダーが接続されていません。",
     calReauth:"Googleカレンダーの再ログインが必要です。", calDenied:"カレンダーの利用が許可されませんでした。", calErr:"カレンダー登録に失敗しました。",
     h:"{h}時間{m}分", m:"{m}分", kg:"kg", repUnit:"回",
-    freq:"よく使う", cardio:"有酸素", field:"フィールドワーク", catBack:"‹ 戻る",
+    freq:"よく使う", cardio:"有酸素", field:"フィールドワーク", fit:"フィットネス", fitLog:"レッスン時間で記録", catBack:"‹ 戻る",
     allParts:"‹ 部位", exN:"{n}種目", cardioDone:"{name} {t} を記録しました", cardioHint:"",
     gymQ:"どこのジムにいますか？", gymNew:"新しいジムを登録", gymNamePh:"ジム名を入力してください", gymSkip:"あとで",
     gymNext:"次回以降は近隣のジムが自動的に表示されます", nearLocating:"現在地を確認中…", nearDenied:"位置情報がオフのため自動選択できません", nearNoPos:"現在地を取得できませんでした", nearRetry:"再試行", gymReg:"登録", gymSel:"「{name}」で記録します", gymChange:"変更",
@@ -410,7 +416,7 @@ const I18N = {
     kcal:"約{k}kcal", bwHead:"体重（消費カロリーの計算用）", bwUnset:"未設定のため65kgで計算しています",
     bwNote:"消費カロリーは METs × 時間 の推定値です。性別・身長・生年月日があれば基礎代謝で、なければ体重だけで計算します。",
     hList:"一覧", hChart:"グラフ", p30:"1か月", p90:"3か月", p365:"1年", pAll:"全期間",
-    mEx:"種目の重量", mVol:"総挙上量", mKcal:"消費カロリー", mStay:"滞在時間", mVisits:"ジム回数", mParts:"部位別セット", mCardio:"有酸素・フィールド",
+    mEx:"種目の重量", mVol:"総挙上量", mKcal:"消費カロリー", mStay:"滞在時間", mVisits:"ジム回数", mParts:"部位別セット", mCardio:"有酸素・フィールド・フィットネス",
     maxW:"最高重量", e1rm:"推定1RM", cMin:"分", noData:"この期間の記録はありません", tapHint:"棒や点をタップすると数値が出ます",
     sumTotal:"期間合計 {v}", sumAvg:"1回平均 {v}", sumVisits:"期間 {n}回 · 週平均 {w}回", sumBest:"最高 {w}kg · 推定1RM 最高 {r}kg",
     e1rmNote:"推定1RMはEpley式（重量×(1+回数/30)）で、その日のいちばん良いセットから計算しています。", perDay:"日ごと", perWeek:"週ごと（月曜はじまり）", perMonth:"月ごと",
@@ -460,7 +466,7 @@ const I18N = {
     calNoEnv:"Can't reach the calendar here. ", calNoCap:"Calendar access isn't available. ", calNotConn:"Google Calendar isn't connected. ",
     calReauth:"Google Calendar needs you to sign in again. ", calDenied:"Calendar access was not allowed. ", calErr:"Couldn't add to the calendar. ",
     h:"{h}h {m}m", m:"{m} min", kg:"kg", repUnit:"",
-    freq:"Frequent", cardio:"Cardio", field:"Field sports", catBack:"‹ Back",
+    freq:"Frequent", cardio:"Cardio", field:"Field sports", fit:"Fitness", fitLog:"Log by class length", catBack:"‹ Back",
     allParts:"‹ Body parts", exN:"{n} exercises", cardioDone:"Logged {name} {t}", cardioHint:"",
     gymQ:"Which gym are you at?", gymNew:"Add a new gym", gymNamePh:"Enter the gym name", gymSkip:"Later",
     gymNext:"Next time, a nearby gym is picked automatically", nearLocating:"Checking your location…", nearDenied:"Location is off, so no automatic pick", nearNoPos:"Couldn't get your location", nearRetry:"Retry", gymReg:"Add", gymSel:"Logging at “{name}”", gymChange:"Change",
@@ -468,15 +474,15 @@ const I18N = {
     kcal:"~{k} kcal", bwHead:"Body weight (for calories)", bwUnset:"Not set, so 65 kg is used",
     bwNote:"Calories are estimated as METs × time, scaled by your resting metabolism when sex, height and birth date are set, otherwise by body weight alone.",
     hList:"List", hChart:"Charts", p30:"1 month", p90:"3 months", p365:"1 year", pAll:"All time",
-    mEx:"Exercise weight", mVol:"Volume", mKcal:"Calories", mStay:"Gym time", mVisits:"Gym visits", mParts:"Sets by body part", mCardio:"Cardio & field",
+    mEx:"Exercise weight", mVol:"Volume", mKcal:"Calories", mStay:"Gym time", mVisits:"Gym visits", mParts:"Sets by body part", mCardio:"Cardio, field & fitness",
     maxW:"Top weight", e1rm:"Est. 1RM", cMin:"min", noData:"No records in this period", tapHint:"Tap a bar or point to see its value",
     sumTotal:"Period total {v}", sumAvg:"Average per visit {v}", sumVisits:"{n} visits · {w} per week", sumBest:"Best {w}kg · best est. 1RM {r}kg",
     e1rmNote:"Est. 1RM uses the Epley formula (weight × (1 + reps/30)) on the best set of each day.", perDay:"Per day", perWeek:"Per week (from Monday)", perMonth:"Per month",
     weekOf:"Week of {d}"
   }
 };
-const PARTS = ["胸","背中","肩","脚","お尻","腕","腹","有酸素","フィールド"];
-const PART_EN = {"胸":"Chest","背中":"Back","肩":"Shoulders","脚":"Legs","腕":"Arms","腹":"Abs","お尻":"Glutes","有酸素":"Cardio","フィールド":"Field"};
+const PARTS = ["胸","背中","肩","脚","お尻","腕","腹","有酸素","フィールド","フィットネス"];
+const PART_EN = {"胸":"Chest","背中":"Back","肩":"Shoulders","脚":"Legs","腕":"Arms","腹":"Abs","お尻":"Glutes","有酸素":"Cardio","フィールド":"Field","フィットネス":"Fitness"};
 const DEFAULT_EX = [
   ["bench","ベンチプレス","Bench press","free","胸"],["incbench","インクラインベンチプレス","Incline bench press","free","胸"],["dbpress","ダンベルプレス","Dumbbell press","free","胸"],["dbfly","ダンベルフライ","Dumbbell fly","free","胸"],
   ["chestpress","チェストプレス","Chest press","machine","胸"],["pecfly","ペックフライ","Pec fly","machine","胸"],["cablecross","ケーブルクロスオーバー","Cable crossover","machine","胸"],
@@ -494,12 +500,14 @@ const DEFAULT_EX = [
   ["soccer","サッカー","Soccer","field","フィールド"],["futsal","フットサル","Futsal","field","フィールド"],["basketball","バスケットボール","Basketball","field","フィールド"],["tennis","テニス","Tennis","field","フィールド"],
   ["baseball","野球","Baseball","field","フィールド"],["volleyball","バレーボール","Volleyball","field","フィールド"],["rugby","ラグビー","Rugby","field","フィールド"],["handball","ハンドボール","Handball","field","フィールド"],
   ["badminton","バドミントン","Badminton","field","フィールド"],["tabletennis","卓球","Table tennis","field","フィールド"],["golf","ゴルフ","Golf","field","フィールド"],["cycling","サイクリング","Cycling","field","フィールド"],
-  ["jumprope","縄跳び","Jump rope","field","フィールド"],["hiking","ハイキング","Hiking","field","フィールド"],["swimming","水泳","Swimming","field","フィールド"]
+  ["jumprope","縄跳び","Jump rope","field","フィールド"],["hiking","ハイキング","Hiking","field","フィールド"],["swimming","水泳","Swimming","field","フィールド"],
+  ["feelcycle","FEELCYCLE（暗闇バイク）","FEELCYCLE (indoor cycling)","fit","フィットネス"],["bmonster","b-monster（暗闇ボクシング）","b-monster (boxing)","fit","フィットネス"],["lava","LAVA（ホットヨガ）","LAVA (hot yoga)","fit","フィットネス"],["caldo","カルド（ホットヨガ）","Caldo (hot yoga)","fit","フィットネス"],["zenplace","zen place（ピラティス）","zen place (Pilates)","fit","フィットネス"],["pilatesk","ピラティスK","Pilates K","fit","フィットネス"],["curves","カーブス","Curves","fit","フィットネス"],["rizap","パーソナルトレーニング（RIZAP など）","Personal training (RIZAP etc.)","fit","フィットネス"],["bodypump","BODYPUMP（レズミルズ）","BODYPUMP (Les Mills)","fit","フィットネス"],["bodycombat","BODYCOMBAT（レズミルズ）","BODYCOMBAT (Les Mills)","fit","フィットネス"],["zumba","ZUMBA","Zumba","fit","フィットネス"],["crossfit","クロスフィット","CrossFit","fit","フィットネス"],["hiit","HIIT・ブートキャンプ","HIIT / boot camp","fit","フィットネス"],["spinning","スピニング・バイク","Spinning","fit","フィットネス"],["kickbox","キックボクシング","Kickboxing","fit","フィットネス"],["aerobics","エアロビクス","Aerobics","fit","フィットネス"],["aquabics","アクアビクス","Aqua aerobics","fit","フィットネス"],["yoga","ヨガ","Yoga","fit","フィットネス"],["pilates","ピラティス","Pilates","fit","フィットネス"]
 ];
 const CAT_ICON = {
   free:'<svg viewBox="0 0 24 24"><rect x="3.5" y="7" width="3" height="10" rx="1"/><rect x="17.5" y="7" width="3" height="10" rx="1"/><path d="M1.5 10v4M22.5 10v4M6.5 12h11"/></svg>',
   machine:'<svg viewBox="0 0 24 24"><path d="M5 21V3M5 3h12M17 3v5"/><rect x="14" y="13" width="6" height="7" rx="1"/><path d="M14 16.5h6M17 8v5"/><path d="M5 14h5"/></svg>',
   cardio:'<svg viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 7.5 2.8C19.5 15.4 12 20 12 20z"/><path d="M3 12.5h4.5l1.5-2.5 2.5 5 2-3.5h7.5"/></svg>',
+  fit:'<svg viewBox="0 0 24 24"><circle cx="15" cy="16.5" r="3.5"/><path d="M8 5h4M15.5 4h3.5M10 5l3 10M17 4l-2 12.5M13 15l-6 6M4.5 21h15"/></svg>',
   field:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5l4 2.9-1.5 4.7h-5L8 10.4z"/><path d="M12 3v4.5M16 10.4l4.3-1.6M14.5 15.1l2.6 3.8M9.5 15.1l-2.6 3.8M8 10.4L3.7 8.8"/></svg>'
 };
 const EN_NAME = Object.fromEntries(DEFAULT_EX.map(x=>[x[0],x[2]]));
@@ -668,13 +676,15 @@ function partsFor(type){
     .sort((a,b)=> b.n-a.n || PARTS.indexOf(a.p)-PARTS.indexOf(b.p));
 }
 // cardio machines and field sports are logged by time only
-const isCardio = e => e && (e.type==="cardio" || e.type==="field");
+const isCardio = e => e && (e.type==="cardio" || e.type==="field" || e.type==="fit");
 
 // ---------- estimated calories: METs × body weight (kg) × hours (Compendium of Physical Activities) ----------
 const MET_STRENGTH = 3.5; // resistance training, general: gym time that isn't cardio
 const MET_CARDIO = {treadmill:6.0, bike:7.0, elliptical:5.0, rowing:7.0, stairs:9.0,
   running:9.8, jogging:7.0, walking:3.5, sprint:10.0, soccer:7.0, futsal:7.0, basketball:6.5, tennis:7.3, baseball:5.0, volleyball:4.0,
-  rugby:8.3, handball:8.0, badminton:5.5, tabletennis:4.0, golf:4.8, cycling:7.5, jumprope:11.8, hiking:6.0, swimming:5.8};
+  rugby:8.3, handball:8.0, badminton:5.5, tabletennis:4.0, golf:4.8, cycling:7.5, jumprope:11.8, hiking:6.0, swimming:5.8,
+  feelcycle:8.5, bmonster:7.8, lava:3.5, caldo:3.5, zenplace:3.0, pilatesk:3.0, curves:3.5, rizap:5.0, bodypump:5.0, bodycombat:7.3, zumba:6.5, crossfit:8.0, hiit:8.0, spinning:8.5, kickbox:7.3, aerobics:6.5, aquabics:5.3, yoga:2.5, pilates:3.0};
+const LESSON_MIN = {feelcycle:45, bmonster:45, lava:60, caldo:60, zenplace:50, pilatesk:50, curves:30, rizap:50, bodypump:45, bodycombat:45, zumba:45, crossfit:60, hiit:30, spinning:45, kickbox:45, aerobics:45, aquabics:45, yoga:60, pilates:50};
 const MET_CARDIO_OTHER = 6.0;
 const bodyKg = ()=> S.settings.bw || 65;
 function ageNow(){ const b=S.settings.birth; if(!b) return null; const [y,m,d]=b.split("-").map(Number), n=new Date(); return n.getFullYear()-y-((n.getMonth()+1<m||(n.getMonth()+1===m&&n.getDate()<d))?1:0); }
@@ -727,6 +737,13 @@ function stopSet(askReps){
   S.timer = {phase:"rest", exId:tm.exId, start:now, setId:s.id, beeped:false}; save({}); render();
   if(askReps!==false) askRepsFor(s.id);
   return s;
+}
+// fitness class logged by its length, ending now
+function logLesson(exId, min){
+  const now=Date.now(), st=now-min*60000; closeRest(now, exId);
+  const s = logSet(exId, min*60, st); s.w=0; s.r=0;
+  const x = sessionFor(now); if(x.start>st) x.start=st; x.end=now; x.u=now; s.sid=x.id;
+  save({}); render(); toast(t("cardioDone",{name:exName(exById(exId)), t:fmt(s.d)})+" · "+kcalTxt(kcalOf(MET_CARDIO[exId]||MET_CARDIO_OTHER, s.d)));
 }
 function quickLog(exId){
   unlockAudio(); const now=Date.now(); closeRest(now, exId);
@@ -789,7 +806,7 @@ function exRow(x,i,showType){
     ${x.today?`<span class="today">${t("todayN",{n:x.today})}</span>`:""}
   </button>`;
 }
-const CATS = ["free","machine","cardio","field"];
+const CATS = ["free","machine","cardio","field","fit"];
 function catStats(type){
   const u=usage(); let n=0, today=0;
   for(const e of S.exercises) if(!e.hidden && e.type===type){ const x=u[e.id]; if(x){ n+=x.days.size; today+=x.today; } }
@@ -808,7 +825,7 @@ function renderList(){
       ${freq.length?`<div class="sec"><h2>${t("freq")}</h2><div class="list" style="margin-top:0">${freq.map((x,i)=>exRow(x,i,true)).join("")}</div></div>`:""}`;
   } else {
     const head = `<div class="crumb k-${nav.cat}"><button class="back" data-act="cats">${t("catBack")}</button><span class="ic">${CAT_ICON[nav.cat]}</span><b>${t(nav.cat)}</b></div>`;
-    if(nav.cat==="cardio"||nav.cat==="field"){
+    if(nav.cat==="cardio"||nav.cat==="field"||nav.cat==="fit"){
       body = head + `<div class="list">${sortedExercises(e=>e.type===nav.cat).map((x,i)=>exRow(x,i)).join("") || `<div class="empty" style="padding:14px">${t("noEx")}</div>`}</div>`;
     } else if(!nav.part){
       const parts = partsFor(nav.cat);
@@ -870,6 +887,7 @@ function renderEx(){
     <div class="subacts">
       ${phase==="work"?`<button class="link" data-act="cancel">${t("cancelSet")}</button>`:isCardio(e)?"":`<button class="link" data-act="quick" ${otherBusy?"disabled":""}>${t("quick")}</button>`}
     </div>
+    ${e.type==="fit"&&phase!=="work"?`<div class="lessons"><div class="lbl">${t("fitLog")}</div><div class="chips">${[...new Set([LESSON_MIN[e.id]||45,30,45,60])].sort((a,b)=>a-b).map(m=>`<button class="chip ${m===(LESSON_MIN[e.id]||45)?"on":""}" data-lesson="${m}" ${otherBusy?"disabled":""}>${m}${t("cMin")}</button>`).join("")}</div></div>`:""}
     ${!isCardio(e)&&(phase==="rest"||phase==="work")?`<button class="finish" data-act="finish">${phase==="work"?t("stopFinish"):t("finish")}<span>${t("setsN",{n:todaySets.length+(phase==="work"?1:0)})}</span></button>`:""}
     ${otherBusy?`<div class="note">${t("busy",{name:esc(exName(exById(tm.exId)))})}</div>`:""}
 
@@ -1082,7 +1100,7 @@ function renderSettings(){
       <textarea id="imp" placeholder="${esc(t("pastePh"))}"></textarea>
       <div class="row" style="margin-top:8px"><button class="btn" data-act="import">${t("load")}</button></div>
     </div></div>
-    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261019-0357</p>`;
+    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261019-0500</p>`;
 }
 
 // ---------- tick ----------
@@ -1183,13 +1201,13 @@ function addExercise(){
     <h3>${t("addTitle")}</h3>
     <label class="field">${t("exName")}<input id="nn" placeholder="${esc(t("exPh"))}"></label>
     <div class="seg" id="nt" style="font-size:12px">${CATS.map(k=>`<button data-t="${k}" class="${type===k?"on":""}">${t(k)}</button>`).join("")}</div>
-    <label class="field" id="npw" ${type==="cardio"||type==="field"?"hidden":""}>${t("part")}<select id="np">${PARTS.filter(p=>p!=="有酸素"&&p!=="フィールド").map(p=>`<option value="${p}" ${nav.part===p?"selected":""}>${esc(partName(p))}</option>`).join("")}</select></label>
+    <label class="field" id="npw" ${type==="cardio"||type==="field"||type==="fit"?"hidden":""}>${t("part")}<select id="np">${PARTS.filter(p=>p!=="有酸素"&&p!=="フィールド"&&p!=="フィットネス").map(p=>`<option value="${p}" ${nav.part===p?"selected":""}>${esc(partName(p))}</option>`).join("")}</select></label>
     <div class="acts"><button class="btn" data-act="close">${t("cancel")}</button><button class="btn primary" id="nsave">${t("add")}</button></div>
   </div></div>`;
-  sheet.querySelectorAll("#nt button").forEach(b=>b.onclick=()=>{ type=b.dataset.t; sheet.querySelector("#npw").hidden = type==="cardio"||type==="field"; sheet.querySelectorAll("#nt button").forEach(x=>x.classList.toggle("on",x===b)); });
+  sheet.querySelectorAll("#nt button").forEach(b=>b.onclick=()=>{ type=b.dataset.t; sheet.querySelector("#npw").hidden = type==="cardio"||type==="field"||type==="fit"; sheet.querySelectorAll("#nt button").forEach(x=>x.classList.toggle("on",x===b)); });
   sheet.querySelector("#nsave").onclick=()=>{
     const name=sheet.querySelector("#nn").value.trim(); if(!name){ sheet.querySelector("#nn").focus(); return; }
-    S.exercises.push({id:"c"+uid(), name, type, part:type==="cardio"?"有酸素":type==="field"?"フィールド":sheet.querySelector("#np").value, custom:true, o:1000+S.exercises.length, u:Date.now()});
+    S.exercises.push({id:"c"+uid(), name, type, part:type==="cardio"?"有酸素":type==="field"?"フィールド":type==="fit"?"フィットネス":sheet.querySelector("#np").value, custom:true, o:1000+S.exercises.length, u:Date.now()});
     save({}); closeSheet(); render(); toast(t("added",{name}));
   };
   setTimeout(()=>sheet.querySelector("#nn")?.focus(),50);
@@ -1328,6 +1346,7 @@ app.addEventListener("click", ev=>{
   if(d.ex){ view={name:"ex",ex:d.ex,filter:view.filter}; window.scrollTo(0,0); render(); return; }
   if(d.set){ editSet(d.set); return; }
   if(d.setlang){ S.settings.lang=d.setlang; save({}); drawEntry(); render(); return; }
+  if(d.lesson){ logLesson(view.ex, +d.lesson); return; }
   if(d.rest){ S.settings.rest=+d.rest; if(S.timer.phase==="rest") S.timer.beeped=((Date.now()-S.timer.start)/1000)>=S.settings.rest; save({}); render(); return; }
   if(d.w){ const v=vals(view.ex); const st=v.step; const w=Math.max(0, Math.round((v.w + st*(+d.w))/st)*st); setVals(view.ex,{w:Math.round(w*100)/100}); document.getElementById("w").value=fmtKg(vals(view.ex).w); return; }
   if(d.sr!=null){ const rs=readSauna(); const r=rs[+d.sr]; r[d.k]=Math.max(0, r[d.k]+(+d.d)); document.getElementById(`sr-${d.sr}-${d.k}`).value=r[d.k]; return; }
