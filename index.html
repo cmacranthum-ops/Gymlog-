@@ -41,11 +41,14 @@ h1{font-family:var(--display);font-weight:400;font-size:30px;letter-spacing:.02e
 .entry .content{position:relative;height:100%;justify-content:flex-end;padding:env(safe-area-inset-top,0px) max(24px,env(safe-area-inset-right,0px)) calc(28px + env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px;max-width:560px;width:100%;align-self:center;box-sizing:border-box}
 .entry .brand{font-family:var(--display);font-size:64px;line-height:.9;letter-spacing:.02em;margin:0}
 .entry .brandbox{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:150px}
-.entry .brand{font-size:clamp(56px,19vw,96px);position:relative;z-index:1;white-space:nowrap;display:flex;align-items:flex-start;gap:.42em}
-.entry .brand .bs{margin-top:.5em}
+.entry .brand{font-size:clamp(50px,16.5vw,96px);position:relative;z-index:1;white-space:nowrap;display:flex;align-items:flex-start;gap:.6em}
+
 .entry .brand .bm{color:#c9b6ff;text-shadow:0 0 24px rgba(139,92,246,.8)}
 .entry .brand .bs{color:#ff8fb4;text-shadow:0 0 24px rgba(214,51,108,.8)}
-.entry .bsub{margin-top:0;font-size:15px;position:relative;z-index:1;transform:translateX(3.6em);text-shadow:0 1px 6px #000;font-size:13px;font-weight:700;letter-spacing:.25em;color:#cfc6e2}
+.entry .bsub .ta{color:#c9b6ff}
+.entry .bsub .tm{color:#fff;margin:0 .35em}
+.entry .bsub .tb{color:#ff8fb4}
+.entry .bsub{margin-top:0;font-size:16px;position:relative;z-index:1;text-shadow:0 1px 6px #000;white-space:nowrap;font-size:13px;font-weight:700;letter-spacing:.25em;color:#cfc6e2}
 .entry .bsub i{font-style:normal;opacity:.6}
 .entry .lede{color:#cfc6e2;font-size:15px;margin:0}
 .entry .who{font-size:13px;color:var(--muted)}
@@ -359,7 +362,7 @@ const I18N = {
     modeGym:"ジム", modeSauna:"サウナ", sauna:"サウナ", saunaQ:"どこのサウナにいますか？", saunaNamePh:"サウナ名を入力してください", saunaNone:"場所未選択", saunaNext:"次回以降は近隣のサウナが自動的に表示されます",
     sTemp:"温度", sMin:"1回の時間", sRounds:"回数", sSave:"記録する", sSaved:"サウナを記録しました", sRecent:"最近のサウナ", sNone:"まだ記録がありません",
     sTime:"時間", roundN:"{n}回目", sAdd:"＋ 回を追加", sDel:"削除", placeSauna:"サウナ", sBefore:"入る前の体重", sAfter:"出た後の体重", sOpt:"任意", sweat:"発汗 {g}g", sweatEst:"発汗 約{g}g（推定）", mSKcal:"サウナ消費カロリー", mSweat:"サウナ発汗量", mSVisits:"サウナ回数",
-    tagline:"運動とサウナの記録", obHt:"身長", male:"男性", female:"女性", yearPh:"生まれ年", monthPh:"月", dayPh:"日",
+    tagA:"運動", tagM:"と", tagB:"サウナの記録", obHt:"身長", male:"男性", female:"女性", yearPh:"生まれ年", monthPh:"月", dayPh:"日",
     profHead:"プロフィール", bwAsk:"体重は変わりましたか？", bwAskNote:"前回 {d}", bwKeep:"そのまま", bwUpd:"更新", bwUpdated:"体重を {w}kg に更新しました", obName:"ニックネーム", obBw:"体重", obGo:"はじめる", enter:"ジム", hello:"おかえりなさい、{name}さん", nickHead:"ニックネーム",
     exercises:"トレーニング", todaySets:"今日 {n} セット",
     all:"すべて", machine:"マシン", free:"フリーウェイト", noEx:"表示する種目がありません", addEx:"＋ 種目を追加",
@@ -417,7 +420,7 @@ const I18N = {
     modeGym:"Gym", modeSauna:"Sauna", sauna:"Sauna", saunaQ:"Which sauna are you at?", saunaNamePh:"Enter the sauna name", saunaNone:"No place selected", saunaNext:"Next time, a nearby sauna is picked automatically",
     sTemp:"Temperature", sMin:"Minutes per round", sRounds:"Rounds", sSave:"Save", sSaved:"Sauna logged", sRecent:"Recent sauna visits", sNone:"No records yet",
     sTime:"Time", roundN:"Round {n}", sAdd:"+ Add a round", sDel:"Delete", placeSauna:"Sauna", sBefore:"Weight before", sAfter:"Weight after", sOpt:"optional", sweat:"Sweat {g} g", sweatEst:"Sweat ~{g} g (est.)", mSKcal:"Sauna calories", mSweat:"Sauna sweat", mSVisits:"Sauna visits",
-    tagline:"Workout & Sauna Log", obHt:"Height", male:"Male", female:"Female", yearPh:"Birth year", monthPh:"Month", dayPh:"Day",
+    tagA:"Workout", tagM:"&", tagB:"Sauna Log", obHt:"Height", male:"Male", female:"Female", yearPh:"Birth year", monthPh:"Month", dayPh:"Day",
     profHead:"Profile", bwAsk:"Has your weight changed?", bwAskNote:"Last updated {d}", bwKeep:"No change", bwUpd:"Update", bwUpdated:"Weight updated to {w} kg", obName:"Nickname", obBw:"Body weight", obGo:"Get started", enter:"Gym", hello:"Welcome back, {name}", nickHead:"Nickname",
     exercises:"Training", todaySets:"{n} sets today",
     all:"All", machine:"Machine", free:"Free weight", noEx:"No exercises to show", addEx:"+ Add exercise",
@@ -1078,7 +1081,7 @@ function renderSettings(){
       <textarea id="imp" placeholder="${esc(t("pastePh"))}"></textarea>
       <div class="row" style="margin-top:8px"><button class="btn" data-act="import">${t("load")}</button></div>
     </div></div>
-    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261019-0235</p>`;
+    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261019-0350</p>`;
 }
 
 // ---------- tick ----------
@@ -1208,7 +1211,11 @@ function drawHero(){
   const set=(id,a)=>{ const el=document.getElementById(id); for(const k in a) el.setAttribute(k,a[k]); };
   const g=document.querySelector("#brand .bm").getBoundingClientRect(), sa=document.querySelector("#brand .bs").getBoundingClientRect(), r=svg.getBoundingClientRect();
   // a point midway between GYM's lower right corner and SAUNA's upper left corner
-  const cx=(g.right+sa.left)/2-r.left, cy=(g.bottom-g.height*.2+sa.top+sa.height*.2)/2-r.top;
+  const cx=(g.right+sa.left)/2-r.left, cy=(g.top+g.bottom)/2-r.top;
+  // slide the tagline so its middle word ("と" / "&") sits on the line
+  const bs=document.getElementById("bsub"), tm=document.getElementById("tagMid");
+  if(bs&&tm){ bs.style.transform=""; const m=tm.getBoundingClientRect(), my=(m.top+m.bottom)/2-r.top, want=cx-(my-cy)*SLOPE;
+    bs.style.transform=`translateX(${want-((m.left+m.right)/2-r.left)}px)`; }
   const xt=cx+cy*SLOPE, xb=cx-(H-cy)*SLOPE;
   ["hBg","hGrain"].forEach(id=>set(id,{width:W,height:H}));
   // the purple side is left of the line, the magenta side right of it (overflow is clipped)
@@ -1243,7 +1250,7 @@ function drawEntry(){
   const bw=document.getElementById("obBw"); if(!bw.value && S.settings.bw) bw.value=fmtKg(S.settings.bw);
   const nm=document.getElementById("obName"); if(!nm.value && viewerName) nm.value=viewerName.split(/\s+/)[0];
   document.getElementById("obGo").textContent = t("obGo");
-  document.getElementById("bsub").textContent = t("tagline");
+  document.getElementById("bsub").innerHTML = `<span class="ta">${t("tagA")}</span><span class="tm" id="tagMid">${t("tagM")}</span><span class="tb">${t("tagB")}</span>`;
   document.getElementById("enter").innerHTML = CAT_ICON.free+t("modeGym");
   document.getElementById("enterSauna").innerHTML = '<svg viewBox="0 0 100 100" style="stroke-width:7"><path d="M14 62a36 18 0 1 0 72 0"/><path d="M14 62c8-5 14-5 14-5M86 62c-8-5-14-5-14-5"/><path d="M34 46c-8-9 8-13 0-22s4-14 4-14M50 46c-8-9 8-13 0-22s4-14 4-14M66 46c-8-9 8-13 0-22s4-14 4-14"/></svg>'+t("modeSauna");
   document.querySelectorAll("#langs button,#obLang button").forEach(b=>b.classList.toggle("on", b.dataset.lang===S.settings.lang));
