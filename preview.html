@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ja"><head><meta charset="utf-8">
-<meta name="app-ver" content="20261021-0223">
+<meta name="app-ver" content="20261021-0622">
 <meta name="app-note" content="地図機能を追加|Added a map">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#08070b"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -271,7 +271,7 @@ body.ph-rest .pill{background:#1d4ed8;border-color:#93b4ff}
 .mapbox .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.82) contrast(.92)}
 .mapbox .leaflet-container,.mapbox.leaflet-container{background:#1b1a1f;font:inherit}
 .mapbox .leaflet-popup-content-wrapper,.mapbox .leaflet-popup-tip{background:var(--surface2);color:var(--ink);border:1px solid var(--line);box-shadow:0 8px 24px rgba(0,0,0,.5)}
-.mapbox .leaflet-popup-content{margin:12px 14px;font-size:14px;line-height:1.5;min-width:170px}
+.mapbox .leaflet-popup-content{margin:12px 14px;font-size:14px;line-height:1.5}
 .mapbox .leaflet-popup-close-button{color:var(--muted)!important}
 .mapbox .leaflet-control-attribution{background:rgba(10,9,14,.75);color:var(--muted);font-size:10px}
 .mapbox .leaflet-control-attribution a{color:var(--muted)}
@@ -537,7 +537,7 @@ const I18N = {
     mapNoPos:"位置が未登録の場所", mapNoPosNote:"その場所で記録すると位置が自動で入ります。地図をタップして決めることもできます。", mapSet:"地図で決める",
     mapTapHint:"地図をタップして「{name}」の位置を決めてください", mapPlaced:"「{name}」の位置を保存しました", mapLoading:"地図を読み込み中…",
     mapFail:"地図を読み込めませんでした。電波のある場所で開き直してください。", mapRetry:"再読み込み", mapEmpty:"まだ場所が登録されていません。運動やサウナで場所を選ぶと、ここに表示されます。",
-    histPlace:"{name} の記録", histPlaceAll:"すべて表示",
+    histPlace:"{name} の記録", histPlaceAll:"すべて表示", rename:"名前", renTitle:"場所の名前を直す", renSave:"保存", renDone:"名前を「{name}」にしました", mapRename:"名前を直す",
     modeGym:"運動", gymCat:"ジム", modeSauna:"サウナ", sauna:"サウナ", saunaQ:"どこのサウナにいますか？", saunaNamePh:"サウナ名を入力してください", saunaNone:"場所未選択", saunaNext:"※ 次回以降は、近くのサウナが自動で出ます",
     sTemp:"温度", sMin:"1回の時間", sRounds:"回数", sSave:"記録する", sSaved:"サウナを記録しました", sRecent:"最近のサウナ", sNone:"まだ記録がありません",
     sTime:"時間", roundN:"{n}回目", sAdd:"＋ 回を追加", sDel:"削除", placeSauna:"サウナ", sBefore:"入る前の体重", sAfter:"出た後の体重", sWater:"飲水量", sWaterNote:"※ 体重の前後と飲水量の3つがそろうと実測、1つでも空欄なら推定になります", sOpt:"任意", sweat:"発汗 {g}g", sweatEst:"発汗 約{g}g（推定）", mSKcal:"サウナ消費カロリー", mSweat:"サウナ発汗量", mSVisits:"サウナ回数",
@@ -608,7 +608,7 @@ const I18N = {
     mapNoPos:"Places without a location", mapNoPosNote:"A location is added when you log at the place. You can also tap the map to set it.", mapSet:"Set on map",
     mapTapHint:"Tap the map to place “{name}”", mapPlaced:"Saved the location of “{name}”", mapLoading:"Loading the map…",
     mapFail:"Couldn't load the map. Try again where you have a signal.", mapRetry:"Reload", mapEmpty:"No places yet. Pick a place when you work out or go to a sauna and it will show up here.",
-    histPlace:"Records at {name}", histPlaceAll:"Show all",
+    histPlace:"Records at {name}", histPlaceAll:"Show all", rename:"Rename", renTitle:"Rename this place", renSave:"Save", renDone:"Renamed to “{name}”", mapRename:"Rename",
     modeGym:"Workout", gymCat:"Gym", modeSauna:"Sauna", sauna:"Sauna", saunaQ:"Which sauna are you at?", saunaNamePh:"Enter the sauna name", saunaNone:"No place selected", saunaNext:"* Next time, a nearby sauna appears automatically",
     sTemp:"Temperature", sMin:"Minutes per round", sRounds:"Rounds", sSave:"Save", sSaved:"Sauna logged", sRecent:"Recent sauna visits", sNone:"No records yet",
     sTime:"Time", roundN:"#{n}", sAdd:"+ Add a round", sDel:"Delete", placeSauna:"Sauna", sBefore:"Weight before", sAfter:"Weight after", sWater:"Water drunk", sWaterNote:"* With weight before, after and water drunk all filled in, sweat is measured; otherwise it is estimated", sOpt:"optional", sweat:"Sweat {g} g", sweatEst:"Sweat ~{g} g (est.)", mSKcal:"Sauna calories", mSweat:"Sauna sweat", mSVisits:"Sauna visits",
@@ -823,6 +823,13 @@ function getPos(){
     .catch(e=> e && e.code===1 ? Promise.reject(e) : once({enableHighAccuracy:true, timeout:20000, maximumAge:60000}));
 }
 let lastPos=null;
+// a place with no pin gets one when something is recorded there (the picker may never open if the place is already chosen)
+const posBusy={};
+function fillPos(id){
+  const g=id&&gymById(id); if(!g || g.lat!=null || posBusy[id]) return;
+  posBusy[id]=1;
+  getPos().then(c=>{ lastPos={lat:c.latitude, lon:c.longitude}; const h=gymById(id); if(h && h.lat==null){ h.lat=c.latitude; h.lon=c.longitude; h.u=Date.now(); save({}); } }).catch(()=>{}).finally(()=>{ delete posBusy[id]; });
+}
 // GPS → the nearest saved gym within 500 m is selected without asking (no map server involved)
 async function autoGym(){
   const paint=h=>{ const b=sheet.querySelector("#nearList"); if(b) b.innerHTML=h; }, note=x=>`<p class="note" style="margin:0">${x}</p>`;
@@ -1069,7 +1076,7 @@ function endGym(){
 function logSet(exId, dur, ts){
   const v = vals(exId);
   const s = {id:uid(), ex:exId, w:v.w, r:v.r, t:ts, d:dur, rest:null};
-  touchSet(s); S.sets.push(s); return s;
+  touchSet(s); S.sets.push(s); fillPos(S.currentGym); return s;
 }
 function vals(exId){
   const e = exById(exId); const l = S.last[exId];
@@ -1628,7 +1635,7 @@ function renderMap(){
       const s=st[g.id];
       const mk=L.circleMarker([g.lat,g.lon], {radius:s&&s.n>=10?11:s&&s.n>=3?9:7, color:"#fff", weight:1.5, fillColor:placeColor(g), fillOpacity:.95}).addTo(m);
       mk.bindPopup(`<div class="mpop"><b><i style="background:${placeColor(g)}"></i>${esc(g.name)}</b><span class="sub">${s?t("visitsN",{n:s.n})+" · "+t("mapLast",{d:dayLabel(dayKey(s.last))}):""}</span>
-        <div class="acts">${s?`<button class="sbtn on" data-mrec="${g.id}">${t("mapRec")}</button>`:""}<button class="sbtn" data-mapset="${g.id}">${t("mapMove")}</button></div></div>`, {closeButton:true, autoPanPadding:[20,20]});
+        <div class="acts">${s?`<button class="sbtn on" data-mrec="${g.id}">${t("mapRec")}</button>`:""}<button class="sbtn" data-mapset="${g.id}">${t("mapMove")}</button><button class="sbtn" data-rengym="${g.id}">${t("mapRename")}</button></div></div>`, {closeButton:true, autoPanPadding:[16,16], maxWidth:Math.min(260, innerWidth-110), minWidth:Math.min(170, innerWidth-110)});
       marks[g.id]=mk;
     }
     m.on("click", e=>{
@@ -1649,6 +1656,16 @@ function renderMap(){
     const msg=document.getElementById("mapmsg"); if(!msg) return;
     msg.innerHTML=`<div>${t("mapFail")}<br><button class="sbtn" style="margin-top:10px" data-act="mapretry">${t("mapRetry")}</button></div>`;
   });
+}
+function renameGym(id){
+  const g=gymById(id); if(!g) return;
+  sheet.innerHTML = `<div class="scrim" data-act="close"><div class="sheet" role="dialog" aria-label="${esc(t("renTitle"))}">
+    <h3>${t("renTitle")}</h3>
+    <input id="rgn" maxlength="40" value="${esc(g.name)}" style="width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:11px;font-size:16px;color:var(--ink)">
+    <div class="acts two"><button class="btn" data-act="close">${t("cancel")}</button><button class="btn primary" id="rgok">${t("renSave")}</button></div>
+  </div></div>`;
+  const inp=sheet.querySelector("#rgn");
+  sheet.querySelector("#rgok").onclick=()=>{ const n=inp.value.trim(); if(!n){ inp.focus(); return; } g.name=n; g.u=Date.now(); closeSheet(); save({}); render(); toast(t("renDone",{name:n})); };
 }
 // when placing a pin, start near the most recently added place that has one
 function lastPin(){ const g=S.gyms.filter(g=>g.lat!=null).sort((a,b)=>(b.u||0)-(a.u||0))[0]; return g?[g.lat,g.lon]:null; }
@@ -1680,7 +1697,7 @@ function renderSettings(){
       ${HEALTH_SC_URL?`<a class="btn" style="display:block;text-align:center;margin-top:10px;text-decoration:none;color:inherit" href="${HEALTH_SC_URL}" target="_blank" rel="noopener">${t("hlGet")}</a>`:""}
     </div></div>
     <div class="sec"><h2>${t("gyms")}</h2><div class="card">
-      ${gymsSorted().map(x=>`<div class="mgr"><span class="nm">${kindOf(x.g)==="sauna"?`<span class="sc">${t("placeSauna")}</span> `:""}${x.g.url&&/^https:\/\//.test(x.g.url)?`<a href="${esc(x.g.url)}" target="_blank" rel="noopener" style="color:inherit">${esc(x.g.name)}</a>`:esc(x.g.name)} <span class="sub">${x.n?t("visitsN",{n:x.n}):""}</span></span><button class="sbtn danger" data-delgym="${x.g.id}">${view.confirmGym===x.g.id?t("reallyDel"):t("del")}</button></div>`).join("")}
+      ${gymsSorted().map(x=>`<div class="mgr"><span class="nm">${kindOf(x.g)==="sauna"?`<span class="sc">${t("placeSauna")}</span> `:""}${x.g.url&&/^https:\/\//.test(x.g.url)?`<a href="${esc(x.g.url)}" target="_blank" rel="noopener" style="color:inherit">${esc(x.g.name)}</a>`:esc(x.g.name)} <span class="sub">${x.n?t("visitsN",{n:x.n}):""}</span></span><button class="sbtn" data-rengym="${x.g.id}">${t("rename")}</button><button class="sbtn danger" data-delgym="${x.g.id}">${view.confirmGym===x.g.id?t("reallyDel"):t("del")}</button></div>`).join("")}
       <button class="addbtn" data-act="gym">＋ ${t("gymNew")}</button>
     </div></div>
     <div class="sec"><h2>${t("manage")}</h2><div class="card">
@@ -1702,7 +1719,7 @@ function renderSettings(){
     </div></div>
     <button class="btn" style="width:100%" data-act="tut">${t("tutAgain")}</button>
     <button class="btn danger" style="width:100%;margin-top:24px" data-act="reset">${t("resetBtn")}</button>
-    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261021-0223 · ${isJa()?"地図機能を追加":"Added a map"}</p>`;
+    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261021-0622 · ${isJa()?"地図機能を追加":"Added a map"}</p>`;
 }
 
 // ---------- tick ----------
@@ -2082,6 +2099,7 @@ app.addEventListener("click", ev=>{
   const d=b.dataset;
   if(d.hmode){ hist.mode=d.hmode; render(); return; }
   if(d.act==="hplall"){ hist.place=null; render(); return; }
+  if(d.rengym){ renameGym(d.rengym); return; }
   if(d.mrec){ hist.place=d.mrec; hist.mode="list"; view={name:"history", filter:view.filter||"all"}; window.scrollTo(0,0); render(); return; }
   if(d.mapset){ mapUI.placing=d.mapset; window.scrollTo(0,0); render(); return; }
   if(d.act==="mapcancel"){ mapUI.placing=null; render(); return; }
@@ -2126,7 +2144,7 @@ app.addEventListener("click", ev=>{
     case "saunaadd": { const rs=readSauna(); if(rs.length<MAX_ROUNDS){ const last=(S.saunaLast&&S.saunaLast.rounds)||[]; rs.push(Object.assign({}, last[rs.length]||rs[rs.length-1])); } render(); break; }
     case "saunasave": { const rs=readSauna().map(r=>{ const o={temp:r.temp, min:r.min}; for(const k of ["wt","wm","om"]) if(r[k]!=null) o[k]=r[k]; return o; }); const kg=id=>{ const w=parseFloat(document.getElementById(id)?.value); return !isNaN(w)&&w>=20&&w<=300? Math.round(w*10)/10 : null; };
       const x={id:uid(), t:Date.now(), place:S.currentSauna||null, rounds:rs, tt:sTT||undefined, wb:kg("swb"), wa:kg("swa"), dr:(v=>!isNaN(v)&&v>=0&&v<=5000? Math.round(v) : null)(parseFloat(document.getElementById("swd")?.value)), u:Date.now()};
-      if(!x.tt) delete x.tt; S.saunaLast={rounds:rs}; S.saunas.push(x); if(x.wb||x.wa) setBw(x.wb||x.wa); sDraft=null; sTT=0; save({}); render(); toast(t("sSaved")+" · "+saunaSum(x), null, null, ()=>undoRec("sau", x.id));
+      if(!x.tt) delete x.tt; S.saunaLast={rounds:rs}; S.saunas.push(x); fillPos(x.place); if(x.wb||x.wa) setBw(x.wb||x.wa); sDraft=null; sTT=0; save({}); render(); toast(t("sSaved")+" · "+saunaSum(x), null, null, ()=>undoRec("sau", x.id));
       endSheet({note: rehydrate(x)>0 ? t("drinkTip",{ml:rehydrate(x).toLocaleString()}) : "", cal:{id:x.id, sr:x, start:x.t-saunaMin(x)*60000, end:x.t, gym:x.place}, hl:{type:"sauna", start:hm(x.t-saunaMin(x)*60000), end:hm(x.t), min:saunaMin(x), kcal:Math.round(saunaKcal(x)), weight:x.wa||x.wb||null}}); break; }
     case "sextra": { readSauna(); const keep=["swb","swa","swd"].map(id=>document.getElementById(id)?.value||""); const on=!(sExtra ?? !!S.settings.sExtra); sExtra=on; S.settings.sExtra=on; save({sync:false}); render();
       ["swb","swa","swd"].forEach((id,i)=>{ const el=document.getElementById(id); if(el) el.value=keep[i]; }); break; }
@@ -2347,7 +2365,7 @@ render();
 
 <script>
 (function(){
-  const cur = "20261021-0223";
+  const cur = "20261021-0622";
   async function checkUpdate(){
     try{
       if(window.S && S.timer && S.timer.phase==="work") return;
