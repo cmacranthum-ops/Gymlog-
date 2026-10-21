@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ja"><head><meta charset="utf-8">
-<meta name="app-ver" content="20261021-0622">
+<meta name="app-ver" content="20261021-0714">
 <meta name="app-note" content="地図機能を追加|Added a map">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#08070b"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -285,6 +285,7 @@ body.ph-rest .pill{background:#1d4ed8;border-color:#93b4ff}
 .mpop .acts button{flex:1;white-space:nowrap}
 .mhint{display:flex;align-items:center;gap:8px;background:var(--violet-deep);border:1px solid var(--violet);border-radius:12px;padding:8px 10px;margin-bottom:8px;font-size:14px}
 .mhint span{flex:1}
+.plk{display:inline;padding:0;font:inherit;color:inherit;text-decoration:underline dotted;text-underline-offset:3px}
 .hpl{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:14px}
 
 /* history & settings */
@@ -537,7 +538,7 @@ const I18N = {
     mapNoPos:"位置が未登録の場所", mapNoPosNote:"その場所で記録すると位置が自動で入ります。地図をタップして決めることもできます。", mapSet:"地図で決める",
     mapTapHint:"地図をタップして「{name}」の位置を決めてください", mapPlaced:"「{name}」の位置を保存しました", mapLoading:"地図を読み込み中…",
     mapFail:"地図を読み込めませんでした。電波のある場所で開き直してください。", mapRetry:"再読み込み", mapEmpty:"まだ場所が登録されていません。運動やサウナで場所を選ぶと、ここに表示されます。",
-    histPlace:"{name} の記録", histPlaceAll:"すべて表示", rename:"名前", renTitle:"場所の名前を直す", renSave:"保存", renDone:"名前を「{name}」にしました", mapRename:"名前を直す",
+    histPlace:"{name} の記録", histPlaceAll:"すべて表示", plSet:"地図で位置を決める", plOnly:"この場所の記録だけ見る", rename:"名前", renTitle:"場所の名前を直す", renSave:"保存", renDone:"名前を「{name}」にしました", mapRename:"名前を直す",
     modeGym:"運動", gymCat:"ジム", modeSauna:"サウナ", sauna:"サウナ", saunaQ:"どこのサウナにいますか？", saunaNamePh:"サウナ名を入力してください", saunaNone:"場所未選択", saunaNext:"※ 次回以降は、近くのサウナが自動で出ます",
     sTemp:"温度", sMin:"1回の時間", sRounds:"回数", sSave:"記録する", sSaved:"サウナを記録しました", sRecent:"最近のサウナ", sNone:"まだ記録がありません",
     sTime:"時間", roundN:"{n}回目", sAdd:"＋ 回を追加", sDel:"削除", placeSauna:"サウナ", sBefore:"入る前の体重", sAfter:"出た後の体重", sWater:"飲水量", sWaterNote:"※ 体重の前後と飲水量の3つがそろうと実測、1つでも空欄なら推定になります", sOpt:"任意", sweat:"発汗 {g}g", sweatEst:"発汗 約{g}g（推定）", mSKcal:"サウナ消費カロリー", mSweat:"サウナ発汗量", mSVisits:"サウナ回数",
@@ -608,7 +609,7 @@ const I18N = {
     mapNoPos:"Places without a location", mapNoPosNote:"A location is added when you log at the place. You can also tap the map to set it.", mapSet:"Set on map",
     mapTapHint:"Tap the map to place “{name}”", mapPlaced:"Saved the location of “{name}”", mapLoading:"Loading the map…",
     mapFail:"Couldn't load the map. Try again where you have a signal.", mapRetry:"Reload", mapEmpty:"No places yet. Pick a place when you work out or go to a sauna and it will show up here.",
-    histPlace:"Records at {name}", histPlaceAll:"Show all", rename:"Rename", renTitle:"Rename this place", renSave:"Save", renDone:"Renamed to “{name}”", mapRename:"Rename",
+    histPlace:"Records at {name}", histPlaceAll:"Show all", plSet:"Set location on map", plOnly:"Only records here", rename:"Rename", renTitle:"Rename this place", renSave:"Save", renDone:"Renamed to “{name}”", mapRename:"Rename",
     modeGym:"Workout", gymCat:"Gym", modeSauna:"Sauna", sauna:"Sauna", saunaQ:"Which sauna are you at?", saunaNamePh:"Enter the sauna name", saunaNone:"No place selected", saunaNext:"* Next time, a nearby sauna appears automatically",
     sTemp:"Temperature", sMin:"Minutes per round", sRounds:"Rounds", sSave:"Save", sSaved:"Sauna logged", sRecent:"Recent sauna visits", sNone:"No records yet",
     sTime:"Time", roundN:"#{n}", sAdd:"+ Add a round", sDel:"Delete", placeSauna:"Sauna", sBefore:"Weight before", sAfter:"Weight after", sWater:"Water drunk", sWaterNote:"* With weight before, after and water drunk all filled in, sweat is measured; otherwise it is estimated", sOpt:"optional", sweat:"Sweat {g} g", sweatEst:"Sweat ~{g} g (est.)", mSKcal:"Sauna calories", mSweat:"Sauna sweat", mSVisits:"Sauna visits",
@@ -1458,10 +1459,10 @@ function histListHTML(){
       const vol = list.reduce((a,s)=>a+(s.wu?0:s.w*s.r),0);
       const visits = S.sessions.filter(x=>dayKey(x.start)===k).sort((a,b)=>a.start-b.start);
       return `<div class="card day"><h3><span class="dh">${dayLabel(k)} <button class="sbtn" data-hday="${k}">${t("dayEdit")}</button></span><span>${list.length?t("totalVol",{n:list.length, v:Math.round(vol).toLocaleString()}):""}${visits.length?" · "+kcalTxt(dayKcal(k)):""}</span></h3>
-        ${visits.map(x=>`<div class="vrow"><span>${gymName(x)?esc(gymName(x))+" · ":""}${t("stay")} <b class="num">${clock(x.start)}–${clock(x.end)}</b>（${fmtHM(x.end-x.start)}）${x.closed?"":t("staying")} · ${kcalTxt(sessionKcal(x))}</span>
+        ${visits.map(x=>`<div class="vrow"><span>${gymName(x)?plLink(x.gym)+" · ":""}${t("stay")} <b class="num">${clock(x.start)}–${clock(x.end)}</b>（${fmtHM(x.end-x.start)}）${x.closed?"":t("staying")} · ${kcalTxt(sessionKcal(x))}</span>
           ${x.closed?(x.cal?`<span class="calok">${t("calDone")}</span>`:`<button class="sbtn" data-cal="${x.id}">${t("calAdd")}</button>`):""}</div>
           ${x.closed&&!x.cal&&calFail[x.id]?`<p class="note">${esc(calFail[x.id])} <a href="${calLink(x)}" target="_blank" rel="noopener">${t("calOpen")}</a></p>`:""}`).join("")}
-        ${(sByDay[k]||[]).map(x=>`<div class="vrow"><span>${t("sauna")}${x.place&&gymById(x.place)?" · "+esc(gymById(x.place).name):""} <b class="num">${saunaLine(x)}</b> · ${saunaSum(x)}</span></div>`).join("")}
+        ${(sByDay[k]||[]).map(x=>`<div class="vrow"><span>${t("sauna")}${x.place&&gymById(x.place)?" · "+plLink(x.place):""} <b class="num">${saunaLine(x)}</b> · ${saunaSum(x)}</span></div>`).join("")}
         <dl class="dl">${groups.map(g=>`<dt>${esc(exName(exById(g.ex)))}</dt><dd>${setsTxt(g.sets)}　<span class="sc">${t("setsN",{n:g.sets.length})}</span>${notesTxt(g.sets)?`<br><span class="sc">${esc(notesTxt(g.sets))}</span>`:""}</dd>`).join("")}</dl></div>`;
     }).join("") || `<div class="card empty">${t("noHist")}</div>`}
     ${days.length>limit?`<button class="btn" style="width:100%" data-act="more">${t("more")}</button>`:""}</div>`;
@@ -1657,6 +1658,21 @@ function renderMap(){
     msg.innerHTML=`<div>${t("mapFail")}<br><button class="sbtn" style="margin-top:10px" data-act="mapretry">${t("mapRetry")}</button></div>`;
   });
 }
+// place names in History open this: rename, move the pin, or show only this place
+const plLink = id => `<button class="plk" data-plmenu="${id}">${esc(gymById(id).name)}</button>`;
+function placeMenu(id){
+  const g=gymById(id); if(!g) return;
+  sheet.innerHTML = `<div class="scrim" data-act="close"><div class="sheet" role="dialog" aria-label="${esc(g.name)}">
+    <h3>${esc(g.name)}</h3>
+    <button class="btn" id="pmRen">${t("mapRename")}</button>
+    <button class="btn" id="pmPos">${g.lat!=null?t("mapMove"):t("plSet")}</button>
+    ${hist.place===id?"":`<button class="btn" id="pmOnly">${t("plOnly")}</button>`}
+    <button class="btn" data-act="close">${t("close")}</button>
+  </div></div>`;
+  sheet.querySelector("#pmRen").onclick=()=>renameGym(id);
+  sheet.querySelector("#pmPos").onclick=()=>{ closeSheet(); mapUI.placing=id; view={name:"map", filter:view.filter||"all"}; window.scrollTo(0,0); render(); };
+  const o=sheet.querySelector("#pmOnly"); if(o) o.onclick=()=>{ closeSheet(); hist.place=id; hist.mode="list"; window.scrollTo(0,0); render(); };
+}
 function renameGym(id){
   const g=gymById(id); if(!g) return;
   sheet.innerHTML = `<div class="scrim" data-act="close"><div class="sheet" role="dialog" aria-label="${esc(t("renTitle"))}">
@@ -1719,7 +1735,7 @@ function renderSettings(){
     </div></div>
     <button class="btn" style="width:100%" data-act="tut">${t("tutAgain")}</button>
     <button class="btn danger" style="width:100%;margin-top:24px" data-act="reset">${t("resetBtn")}</button>
-    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261021-0622 · ${isJa()?"地図機能を追加":"Added a map"}</p>`;
+    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261021-0714 · ${isJa()?"地図機能を追加":"Added a map"}</p>`;
 }
 
 // ---------- tick ----------
@@ -2100,6 +2116,7 @@ app.addEventListener("click", ev=>{
   if(d.hmode){ hist.mode=d.hmode; render(); return; }
   if(d.act==="hplall"){ hist.place=null; render(); return; }
   if(d.rengym){ renameGym(d.rengym); return; }
+  if(d.plmenu){ placeMenu(d.plmenu); return; }
   if(d.mrec){ hist.place=d.mrec; hist.mode="list"; view={name:"history", filter:view.filter||"all"}; window.scrollTo(0,0); render(); return; }
   if(d.mapset){ mapUI.placing=d.mapset; window.scrollTo(0,0); render(); return; }
   if(d.act==="mapcancel"){ mapUI.placing=null; render(); return; }
@@ -2365,7 +2382,7 @@ render();
 
 <script>
 (function(){
-  const cur = "20261021-0622";
+  const cur = "20261021-0714";
   async function checkUpdate(){
     try{
       if(window.S && S.timer && S.timer.phase==="work") return;
