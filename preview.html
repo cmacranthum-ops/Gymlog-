@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ja"><head><meta charset="utf-8">
-<meta name="app-ver" content="20261026-1117">
+<meta name="app-ver" content="20261026-1119">
 <meta name="app-note" content="インターバルの音をジムのタイマー風に、バーを右にドラッグで早送り|Gym-timer style interval beeps; drag the bar right to skip ahead">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#08070b"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -391,6 +391,21 @@ textarea{width:100%;min-height:90px;border-radius:10px;border:1px solid var(--li
 .xrounds .xh{font-size:11px;font-weight:700;color:var(--muted)}
 .xrounds .xr{margin-top:6px}.xrounds .xr b{font-size:12px;color:var(--muted)}
 .xrounds input{min-width:0;width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:9px;font-size:16px;color:var(--ink);text-align:center}
+.cd{position:fixed;inset:0;z-index:85;display:flex;align-items:center;justify-content:center;background:rgba(6,4,12,.55);-webkit-backdrop-filter:blur(14px) brightness(.55);backdrop-filter:blur(14px) brightness(.55);animation:cdIn .25s ease-out both}
+.cd.out{animation:cdOut .35s ease-in forwards}
+.cd svg{position:absolute;width:min(72vw,300px);height:min(72vw,300px);transform:rotate(-90deg);overflow:visible}
+.cd circle{fill:none;stroke-width:6}
+.cd .trk{stroke:rgba(255,255,255,.12)}
+.cd .arc{stroke:var(--violet-hi);stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;filter:drop-shadow(0 0 8px var(--violet))}
+.cd .arc.go{animation:cdArc 1s linear forwards}
+.cd b{position:relative;font-family:var(--display);font-weight:400;color:#fff;font-size:min(46vw,190px);line-height:1;text-shadow:0 0 30px var(--violet),0 0 70px rgba(139,92,246,.6);animation:cdNum 1s cubic-bezier(.2,.8,.2,1) both}
+.cd b.st{font-size:min(24vw,104px);letter-spacing:.04em;background:linear-gradient(180deg,#fff,var(--violet-hi));-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 0 22px var(--violet));animation:cdGo .7s cubic-bezier(.2,.8,.2,1) both}
+@keyframes cdIn{from{opacity:0}}
+@keyframes cdOut{to{opacity:0}}
+@keyframes cdArc{to{stroke-dashoffset:0}}
+@keyframes cdNum{0%{transform:scale(1.9);opacity:0}18%{transform:scale(1);opacity:1}80%{transform:scale(.92);opacity:1}100%{transform:scale(.7);opacity:0}}
+@keyframes cdGo{0%{transform:scale(.4);opacity:0}35%{transform:scale(1.08);opacity:1}100%{transform:scale(1.25);opacity:1}}
+@media (prefers-reduced-motion:reduce){.cd b,.cd b.st{animation:none}}
 .a2hsw{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px}
 .a2hs{max-width:420px;padding:16px;border-radius:12px;background:var(--surface);border:1px solid var(--violet);font-size:13px;line-height:1.55}
 .a2hs p{margin:4px 0 8px;color:var(--muted)}.a2hs .btn{padding:8px 14px}
@@ -1066,6 +1081,23 @@ function logLesson(exId, min){
   const s = logSet(exId, min*60, st); s.w=0; s.r=0;
   const x = sessionFor(now); if(x.start>st) x.start=st; x.end=now; x.u=now; s.sid=x.id;
   view={name:"list"}; window.scrollTo(0,0); save({}); render(); toast(t("cardioDone",{name:exName(exById(exId)), t:fmt(s.d)})+" · "+kcalTxt(kcalOf(MET_CARDIO[exId]||MET_CARDIO_OTHER, s.d)), null, null, ()=>undoRec("set", s.id));
+}
+// full-screen 3-2-1-START before a set; tap anywhere to start at once
+let cdOn=false;
+function countdown(go){
+  if(cdOn) return; cdOn=true; unlockAudio();
+  const ov=document.createElement("div"); ov.className="cd";
+  ov.innerHTML='<svg viewBox="0 0 110 110"><circle class="trk" cx="55" cy="55" r="50"/><circle class="arc" cx="55" cy="55" r="50" pathLength="100"/></svg><b></b>';
+  document.body.appendChild(ov);
+  const arc=ov.querySelector(".arc"); let n=3, timer=null, started=false;
+  const show=(txt,cls)=>{ const el=document.createElement("b"); el.textContent=txt; if(cls) el.className=cls; ov.querySelector("b").replaceWith(el); };
+  const startNow=()=>{ if(started) return; started=true; clearTimeout(timer); show("START","st"); tone(0.45);
+    arc.classList.remove("go"); arc.style.strokeDashoffset="0"; go();
+    setTimeout(()=>ov.classList.add("out"),650); setTimeout(()=>{ ov.remove(); cdOn=false; },1000); };
+  const step=()=>{ if(n===0) return startNow();
+    show(String(n)); tone(0.12); arc.classList.remove("go"); void arc.getBoundingClientRect(); arc.classList.add("go"); n--; timer=setTimeout(step,1000); };
+  ov.addEventListener("click",startNow);
+  step();
 }
 function quickLog(exId){
   unlockAudio(); const now=Date.now(); closeRest(now, exId);
@@ -1823,7 +1855,7 @@ function renderSettings(){
     </div></div>
     <button class="btn" style="width:100%" data-act="tut">${t("tutAgain")}</button>
     <button class="btn danger" style="width:100%;margin-top:24px" data-act="reset">${t("resetBtn")}</button>
-    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261026-1117 · ${isJa()?"インターバルの音をジムのタイマー風に、バーを右にドラッグで早送り":"Gym-timer style interval beeps; drag the bar right to skip ahead"}</p>`;
+    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261026-1119 · ${isJa()?"インターバルの音をジムのタイマー風に、バーを右にドラッグで早送り":"Gym-timer style interval beeps; drag the bar right to skip ahead"}</p>`;
 }
 
 // ---------- tick ----------
@@ -2248,7 +2280,7 @@ app.addEventListener("click", ev=>{
     case "parts": nav.part=null; render(); break;
     case "cats": nav.cat=null; nav.sub=null; nav.part=null; nav.menu=null; render(); break;
     case "subs": nav.sub=null; nav.part=null; render(); break;
-    case "start": startSet(view.ex); break;
+    case "start": countdown(()=>startSet(view.ex)); break;
     case "stop": stopSet(); break;
     case "quick": quickLog(view.ex); break;
     case "cancel": S.timer={phase:"idle"}; save({}); render(); break;
@@ -2480,7 +2512,7 @@ render();
 
 <script>
 (function(){
-  const cur = "20261026-1117";
+  const cur = "20261026-1119";
   async function checkUpdate(){
     try{
       if(window.S && S.timer && S.timer.phase==="work") return;
