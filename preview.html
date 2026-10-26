@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ja"><head><meta charset="utf-8">
-<meta name="app-ver" content="20261026-1110">
+<meta name="app-ver" content="20261026-1114">
 <meta name="app-note" content="利用回数の集計を開始（記録の中身・名前・位置は送りません）|Started counting app opens (no records, names or locations are sent)">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#08070b"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -214,6 +214,9 @@ body.ph-work .pill.work{background:#c4202f;border-color:#ff8a92}
 body.ph-rest .pill{background:#1d4ed8;border-color:#93b4ff}
 .bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin:8px 0 10px}
 .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--violet),var(--violet-hi));width:0}
+.seek{position:relative;padding:9px 0;margin:-1px 0 1px;touch-action:none;cursor:pointer}
+.seek .bar{margin:0;height:8px;border-radius:4px}
+.seek .knob{position:absolute;top:50%;left:0;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.45);pointer-events:none}
 .restinfo{font-size:13px;color:var(--muted)}
 .timer.work .restinfo{color:rgba(255,255,255,.8)}
 .rt{margin-top:10px;justify-content:center}
@@ -449,6 +452,8 @@ textarea{width:100%;min-height:90px;border-radius:10px;border:1px solid var(--li
   .exv .timer{padding:4px 10px 6px}
   .exv .timer .clock{font-size:44px;margin:0}
   .exv .timer .bar{margin:2px 0}
+  .exv .timer .seek{padding:7px 0;margin:0}
+  .exv .timer .seek .bar{margin:0}
   .exv .pick{margin-top:6px;padding:4px 10px 6px}
   .exv .stepper button{height:42px}
   .exv .stepper input{font-size:34px}
@@ -564,7 +569,7 @@ const I18N = {
     back:"‹ 種目", noPrev:"前回の記録はまだありません", prev:"前回 {d}：",
     ready:"準備OK", working:"セット中", resting:"インターバル",
     workHint:"", restGoal:"インターバル目標 {t}",
-    goalLeft:"目標 {t} · あと {l}", ffLbl:"インターバルを10秒早送り", ffTxt:"⏩ 10秒", goalOver:"目標 {t} を {l} 超過",
+    goalLeft:"目標 {t} · あと {l}", ffLbl:"右にドラッグで早送り", goalOver:"目標 {t} を {l} 超過",
     weight:"重量", stepLbl:"刻み {s}", start:"スタート", next:"次のセット スタート", stop:"ストップ",
     cancelSet:"このセットを取り消す", quick:"時間を計らずに記録",
     finish:"この種目を終える", stopFinish:"ストップして種目終了", setsN:"{n}セット",
@@ -635,7 +640,7 @@ const I18N = {
     back:"‹ Exercises", noPrev:"No previous record yet", prev:"Last time {d}: ",
     ready:"READY", working:"SET IN PROGRESS", resting:"REST",
     workHint:"", restGoal:"Rest target {t}",
-    goalLeft:"Target {t} · {l} left", ffLbl:"Skip 10 seconds of the interval", ffTxt:"⏩ 10s", goalOver:"{l} over target {t}",
+    goalLeft:"Target {t} · {l} left", ffLbl:"Drag right to skip ahead", goalOver:"{l} over target {t}",
     weight:"Weight", stepLbl:"Step {s}", start:"Start", next:"Start next set", stop:"Stop",
     cancelSet:"Discard this set", quick:"Log without timing",
     finish:"Finish exercise", stopFinish:"Stop & finish", setsN:"{n} sets",
@@ -1022,7 +1027,7 @@ function unlockAudio(){ try{
   if(actx&&actx.state!=="running"){ actx.resume(); const b=actx.createBuffer(1,1,22050), src=actx.createBufferSource(); src.buffer=b; src.connect(actx.destination); src.start(0); }
 }catch(e){} }
 document.addEventListener("touchend",unlockAudio,{passive:true}); document.addEventListener("click",unlockAudio,true);
-// gym-timer style: short "pi" for the countdown, long "piー" at the target. ~2 kHz square is what wall timers use and is loudest on the iPhone speaker
+// gym-timer style: short "pi" for the countdown, "pipipi" twice at the target. ~2 kHz square is what wall timers use and is loudest on the iPhone speaker
 function tone(dur){
   unlockAudio(); if(!actx) return;
   const tt=actx.currentTime+0.01, o=actx.createOscillator(), g=actx.createGain();
@@ -1348,8 +1353,8 @@ function renderEx(){
     <div class="timer ${phase}" id="timer">
       <div class="phase">${phase==="work"?t("working"):phase==="rest"?t("resting"):t("ready")}</div>
       <div class="clock" id="clock">0:00</div>
-      ${phase==="rest"?`<div class="bar"><i id="restbar"></i></div><div class="restinfo" id="restinfo"></div>`:`<div class="restinfo">${isCardio(e)||phase==="work"?"":t("restGoal",{t:fmt(S.settings.rest)})}</div>`}
-      <div class="chips rt" ${isCardio(e)?"hidden":""}>${[60,90,120,180].map(s=>`<button class="chip ${S.settings.rest===s?"on":""}" data-rest="${s}">${fmt(s)}</button>`).join("")}${phase==="rest"?`<button class="chip ff" data-act="ff" aria-label="${t("ffLbl")}">${t("ffTxt")}</button>`:""}</div>
+      ${phase==="rest"?`<div class="seek" id="seek" role="slider" aria-label="${t("ffLbl")}"><div class="bar"><i id="restbar"></i></div><b class="knob" id="knob"></b></div><div class="restinfo" id="restinfo"></div>`:`<div class="restinfo">${isCardio(e)||phase==="work"?"":t("restGoal",{t:fmt(S.settings.rest)})}</div>`}
+      <div class="chips rt" ${isCardio(e)?"hidden":""}>${[60,90,120,180].map(s=>`<button class="chip ${S.settings.rest===s?"on":""}" data-rest="${s}">${fmt(s)}</button>`).join("")}</div>
     </div>
 
     ${isCardio(e)||isBw(e)?"":`<div class="pick">
@@ -1818,7 +1823,7 @@ function renderSettings(){
     </div></div>
     <button class="btn" style="width:100%" data-act="tut">${t("tutAgain")}</button>
     <button class="btn danger" style="width:100%;margin-top:24px" data-act="reset">${t("resetBtn")}</button>
-    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261026-1110 · ${isJa()?"利用回数の集計を開始（記録の中身・名前・位置は送りません）":"Started counting app opens (no records, names or locations are sent)"}</p>`;
+    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261026-1114 · ${isJa()?"利用回数の集計を開始（記録の中身・名前・位置は送りません）":"Started counting app opens (no records, names or locations are sent)"}</p>`;
 }
 
 // ---------- tick ----------
@@ -1832,7 +1837,7 @@ function tick(){
   if(tm.phase==="rest"){
     const sec=(now-tm.start)/1000, target=S.settings.rest;
     for(const k of [3,2,1]){ const at=target-k; if(sec>=at && sec<at+0.6 && tm.pip!==k){ tm.pip=k; tone(0.12); } }
-    if(!tm.beeped && sec>=target){ tm.beeped=true; tone(1.0); document.body.classList.remove("flash"); void document.body.offsetWidth; document.body.classList.add("flash"); setTimeout(()=>document.body.classList.remove("flash"),1300); save({sync:false}); }
+    if(!tm.beeped && sec>=target){ tm.beeped=true; [0,150,300,1000,1150,1300].forEach(ms=>setTimeout(()=>tone(0.1),ms)); document.body.classList.remove("flash"); void document.body.offsetWidth; document.body.classList.add("flash"); setTimeout(()=>document.body.classList.remove("flash"),1300); save({sync:false}); }
     if(sec>15*60){ endRest(); return; }
     const rs=el("sheetRest"); if(rs) rs.textContent=t("restNow",{t:fmt(sec)});
   }
@@ -1840,7 +1845,7 @@ function tick(){
     const c=el("clock"); if(c) c.textContent = tm.phase==="idle"?"0:00":fmt((now-tm.start)/1000);
     if(tm.phase==="rest"){
       const sec=(now-tm.start)/1000, target=S.settings.rest, left=target-sec;
-      const bar=el("restbar"); if(bar) bar.style.width = Math.min(100,sec/target*100)+"%";
+      const bar=el("restbar"), pct=Math.min(100,sec/target*100); if(bar) bar.style.width = pct+"%"; const kn=el("knob"); if(kn) kn.style.left = pct+"%";
       const info=el("restinfo"); if(info) info.textContent = left>0? t("goalLeft",{t:fmt(target),l:fmt(Math.ceil(left))}) : t("goalOver",{t:fmt(target),l:fmt(-left)});
       const tmEl=el("timer"); if(tmEl) tmEl.classList.toggle("over", left<=0);
     }
@@ -1857,6 +1862,15 @@ function tick(){
   } else pill.hidden=true;
 }
 setInterval(tick, 250);
+// drag the interval bar to the right to skip ahead (never backwards)
+let seeking=null;
+function seekTo(x){ const tm=T(); if(!seeking||tm.phase!=="rest") return; const r=seeking.getBoundingClientRect(), target=S.settings.rest;
+  const want=Math.max(0,Math.min(1,(x-r.left)/r.width))*target, cur=(Date.now()-tm.start)/1000;
+  if(want>cur){ tm.start=Date.now()-want*1000; tick(); } }
+document.addEventListener("pointerdown",e=>{ const sk=e.target.closest&&e.target.closest("#seek"); if(!sk) return; seeking=sk; try{ sk.setPointerCapture(e.pointerId); }catch(_){} seekTo(e.clientX); e.preventDefault(); });
+document.addEventListener("pointermove",e=>{ if(seeking) seekTo(e.clientX); });
+const seekEnd=()=>{ if(seeking){ seeking=null; save({sync:false}); } };
+document.addEventListener("pointerup",seekEnd); document.addEventListener("pointercancel",seekEnd);
 
 // ---------- sheets ----------
 const sheet = document.getElementById("sheet");
@@ -2236,7 +2250,6 @@ app.addEventListener("click", ev=>{
     case "subs": nav.sub=null; nav.part=null; render(); break;
     case "start": startSet(view.ex); break;
     case "stop": stopSet(); break;
-    case "ff": if(T().phase==="rest"){ T().start-=10000; save({sync:false}); tick(); } break;
     case "quick": quickLog(view.ex); break;
     case "cancel": S.timer={phase:"idle"}; save({}); render(); break;
     case "finish": confirmAsk(t("finishQ"), finishExercise); break;
@@ -2467,7 +2480,7 @@ render();
 
 <script>
 (function(){
-  const cur = "20261026-1110";
+  const cur = "20261026-1114";
   async function checkUpdate(){
     try{
       if(window.S && S.timer && S.timer.phase==="work") return;
