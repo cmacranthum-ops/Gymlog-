@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ja"><head><meta charset="utf-8">
-<meta name="app-ver" content="20261026-1103">
+<meta name="app-ver" content="20261026-1110">
 <meta name="app-note" content="利用回数の集計を開始（記録の中身・名前・位置は送りません）|Started counting app opens (no records, names or locations are sent)">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#08070b"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -564,7 +564,7 @@ const I18N = {
     back:"‹ 種目", noPrev:"前回の記録はまだありません", prev:"前回 {d}：",
     ready:"準備OK", working:"セット中", resting:"インターバル",
     workHint:"", restGoal:"インターバル目標 {t}",
-    goalLeft:"目標 {t} · あと {l}", goalOver:"目標 {t} を {l} 超過",
+    goalLeft:"目標 {t} · あと {l}", ffLbl:"インターバルを10秒早送り", ffTxt:"⏩ 10秒", goalOver:"目標 {t} を {l} 超過",
     weight:"重量", stepLbl:"刻み {s}", start:"スタート", next:"次のセット スタート", stop:"ストップ",
     cancelSet:"このセットを取り消す", quick:"時間を計らずに記録",
     finish:"この種目を終える", stopFinish:"ストップして種目終了", setsN:"{n}セット",
@@ -635,7 +635,7 @@ const I18N = {
     back:"‹ Exercises", noPrev:"No previous record yet", prev:"Last time {d}: ",
     ready:"READY", working:"SET IN PROGRESS", resting:"REST",
     workHint:"", restGoal:"Rest target {t}",
-    goalLeft:"Target {t} · {l} left", goalOver:"{l} over target {t}",
+    goalLeft:"Target {t} · {l} left", ffLbl:"Skip 10 seconds of the interval", ffTxt:"⏩ 10s", goalOver:"{l} over target {t}",
     weight:"Weight", stepLbl:"Step {s}", start:"Start", next:"Start next set", stop:"Stop",
     cancelSet:"Discard this set", quick:"Log without timing",
     finish:"Finish exercise", stopFinish:"Stop & finish", setsN:"{n} sets",
@@ -1022,12 +1022,13 @@ function unlockAudio(){ try{
   if(actx&&actx.state!=="running"){ actx.resume(); const b=actx.createBuffer(1,1,22050), src=actx.createBufferSource(); src.buffer=b; src.connect(actx.destination); src.start(0); }
 }catch(e){} }
 document.addEventListener("touchend",unlockAudio,{passive:true}); document.addEventListener("click",unlockAudio,true);
-function beep(times){
+// gym-timer style: short "pi" for the countdown, long "piー" at the target. ~2 kHz square is what wall timers use and is loudest on the iPhone speaker
+function tone(dur){
   unlockAudio(); if(!actx) return;
-  for(let i=0;i<times;i++){ const o=actx.createOscillator(), g=actx.createGain(); const tt=actx.currentTime+i*0.28;
-    o.frequency.value=988; o.type="square"; g.gain.setValueAtTime(0.0001,tt); g.gain.exponentialRampToValueAtTime(0.5,tt+0.02); g.gain.exponentialRampToValueAtTime(0.0001,tt+0.2);
-    o.connect(g).connect(actx.destination); o.start(tt); o.stop(tt+0.22); }
-  try{ navigator.vibrate && navigator.vibrate([200,100,200]); }catch(e){}
+  const tt=actx.currentTime+0.01, o=actx.createOscillator(), g=actx.createGain();
+  o.type="square"; o.frequency.value=2050;
+  g.gain.setValueAtTime(0.0001,tt); g.gain.exponentialRampToValueAtTime(1,tt+0.01); g.gain.setValueAtTime(1,tt+dur-0.02); g.gain.exponentialRampToValueAtTime(0.0001,tt+dur);
+  o.connect(g).connect(actx.destination); o.start(tt); o.stop(tt+dur+0.02);
 }
 let wake=null;
 async function keepAwake(){ try{ if("wakeLock" in navigator && !wake){ wake = await navigator.wakeLock.request("screen"); wake.addEventListener("release",()=>{wake=null;}); } }catch(e){} }
@@ -1348,7 +1349,7 @@ function renderEx(){
       <div class="phase">${phase==="work"?t("working"):phase==="rest"?t("resting"):t("ready")}</div>
       <div class="clock" id="clock">0:00</div>
       ${phase==="rest"?`<div class="bar"><i id="restbar"></i></div><div class="restinfo" id="restinfo"></div>`:`<div class="restinfo">${isCardio(e)||phase==="work"?"":t("restGoal",{t:fmt(S.settings.rest)})}</div>`}
-      <div class="chips rt" ${isCardio(e)?"hidden":""}>${[60,90,120,180].map(s=>`<button class="chip ${S.settings.rest===s?"on":""}" data-rest="${s}">${fmt(s)}</button>`).join("")}</div>
+      <div class="chips rt" ${isCardio(e)?"hidden":""}>${[60,90,120,180].map(s=>`<button class="chip ${S.settings.rest===s?"on":""}" data-rest="${s}">${fmt(s)}</button>`).join("")}${phase==="rest"?`<button class="chip ff" data-act="ff" aria-label="${t("ffLbl")}">${t("ffTxt")}</button>`:""}</div>
     </div>
 
     ${isCardio(e)||isBw(e)?"":`<div class="pick">
@@ -1817,7 +1818,7 @@ function renderSettings(){
     </div></div>
     <button class="btn" style="width:100%" data-act="tut">${t("tutAgain")}</button>
     <button class="btn danger" style="width:100%;margin-top:24px" data-act="reset">${t("resetBtn")}</button>
-    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261026-1103 · ${isJa()?"利用回数の集計を開始（記録の中身・名前・位置は送りません）":"Started counting app opens (no records, names or locations are sent)"}</p>`;
+    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261026-1110 · ${isJa()?"利用回数の集計を開始（記録の中身・名前・位置は送りません）":"Started counting app opens (no records, names or locations are sent)"}</p>`;
 }
 
 // ---------- tick ----------
@@ -1830,7 +1831,8 @@ function tick(){
   const onMine = view.name==="ex" && tm.exId===view.ex;
   if(tm.phase==="rest"){
     const sec=(now-tm.start)/1000, target=S.settings.rest;
-    if(!tm.beeped && sec>=target){ tm.beeped=true; beep(3); setTimeout(()=>beep(3),1100); document.body.classList.remove("flash"); void document.body.offsetWidth; document.body.classList.add("flash"); setTimeout(()=>document.body.classList.remove("flash"),1300); save({sync:false}); }
+    for(const k of [3,2,1]){ const at=target-k; if(sec>=at && sec<at+0.6 && tm.pip!==k){ tm.pip=k; tone(0.12); } }
+    if(!tm.beeped && sec>=target){ tm.beeped=true; tone(1.0); document.body.classList.remove("flash"); void document.body.offsetWidth; document.body.classList.add("flash"); setTimeout(()=>document.body.classList.remove("flash"),1300); save({sync:false}); }
     if(sec>15*60){ endRest(); return; }
     const rs=el("sheetRest"); if(rs) rs.textContent=t("restNow",{t:fmt(sec)});
   }
@@ -2234,6 +2236,7 @@ app.addEventListener("click", ev=>{
     case "subs": nav.sub=null; nav.part=null; render(); break;
     case "start": startSet(view.ex); break;
     case "stop": stopSet(); break;
+    case "ff": if(T().phase==="rest"){ T().start-=10000; save({sync:false}); tick(); } break;
     case "quick": quickLog(view.ex); break;
     case "cancel": S.timer={phase:"idle"}; save({}); render(); break;
     case "finish": confirmAsk(t("finishQ"), finishExercise); break;
@@ -2464,7 +2467,7 @@ render();
 
 <script>
 (function(){
-  const cur = "20261026-1103";
+  const cur = "20261026-1110";
   async function checkUpdate(){
     try{
       if(window.S && S.timer && S.timer.phase==="work") return;
