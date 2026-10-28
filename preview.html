@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ja"><head><meta charset="utf-8">
-<meta name="app-ver" content="20261026-1122">
+<meta name="app-ver" content="20261028-0347">
 <meta name="app-note" content="スタートで 3・2・1 のカウントダウン（タップで即スタート）|3-2-1 countdown when you tap Start (tap to skip)">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#08070b"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -220,6 +220,10 @@ body.ph-rest .pill{background:#1d4ed8;border-color:#93b4ff}
 .restinfo{font-size:13px;color:var(--muted)}
 .timer.work .restinfo{color:rgba(255,255,255,.8)}
 .rt{margin-top:10px;justify-content:center}
+.qex{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 4px}
+.qex .lbl{width:100%;font-size:11px;color:var(--muted);letter-spacing:.04em}
+.qex button{padding:4px 9px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);color:var(--ink);font-size:11px;font-weight:600;line-height:1.3}
+.qex button:active{background:var(--violet-deep)}
 .rt .chip{padding:5px 10px}
 .timer.work .rt{display:none}
 
@@ -614,7 +618,7 @@ const I18N = {
     calNoEnv:"ここではカレンダーに接続できません。", calNoCap:"カレンダー連携が使えない状態です。", calNotConn:"Googleカレンダーが接続されていません。",
     calReauth:"Googleカレンダーの再ログインが必要です。", calDenied:"カレンダーの利用が許可されませんでした。", calErr:"カレンダー登録に失敗しました。",
     h:"{h}時間{m}分", m:"{m}分", kg:"kg", repUnit:"回",
-    freq:"よく使う", cardio:"有酸素", field:"フィールドワーク", fit:"フィットネス", fitLog:"レッスン時間で記録", catBack:"‹ 戻る", home:"おうちトレーニング", hbw:"自重", hwt:"ウェイト", htm:"時間で記録",
+    freq:"よく使う", qex:"よくやる種目へ移る", cardio:"有酸素", field:"フィールドワーク", fit:"フィットネス", fitLog:"レッスン時間で記録", catBack:"‹ 戻る", home:"おうちトレーニング", hbw:"自重", hwt:"ウェイト", htm:"時間で記録",
     finishQ:"この種目を終了しますか？", endGymQ:"ジムを終了しますか？", yesEnd:"終了する", padOk:"決定",
     hlHead:"Apple ヘルスケア", hlAuto:"終了時にヘルスケアへ送る", hlGet:"Apple ヘルスケアと連携", hlSend:"ヘルスケアに記録", hlQ:"ヘルスケアに記録しますか？", hlLater:"今はしない", hlAuto2:"終了時にヘルスケアへの記録を表示", watchOwn:"Apple Watchを持っている", watchOn:"今日はApple Watchをつけていた", watchNote:"つけていた日は体重だけ送ります", obWatch:"Apple Watch", obWatchNo:"持っていない", obWatchYes:"持っている", obHlQ:"Apple ヘルスケア", obHlYes:"連携する", obHlNo:"しない", obHlAdd:"ショートカットを入れる（1回だけ）", endHead:"お疲れさまでした", calAdd:"Googleカレンダーに登録", endClose:"閉じる", tutAgain:"使い方を見る", prW:"🏆 自己ベスト更新！ {w}kg", prWR:"🏆 自己ベスト更新！ {w}kg × {r}回", prR:"🏆 自己ベスト更新！ {r}回", wkNow:"今週 {n}/{g}日", wkStreak:"{n}週連続達成", wkDone:"今週の目標達成", goalHead:"週の目標", goalN:"{n}日", menuHead:"マイメニュー", menuN:"{n}種目", menuFromToday:"＋ 今日の種目でメニューを作る", menuName:"メニューの名前", menuPh:"例: 胸の日", menuSave:"保存", menuDel:"このメニューを削除", menuSaved:"「{name}」を保存しました", bkFile:"ファイルに保存", bkOpen:"ファイルから読み込む", bkLast:"最終バックアップ {d}", bkNever:"まだバックアップしていません", bkNote2:"記録はこのiPhoneの中だけにあります。機種変更やSafariのデータ削除で消えるので、ときどき「ファイルに保存」→「“ファイル”に保存」で残してください。", bkNudge:"30日以上バックアップなし → 保存する", bkOr:"コピーして貼り付ける方法",
     allParts:"‹ 部位", exN:"{n}種目", cardioDone:"{name} {t} を記録しました", cardioHint:"",
@@ -685,7 +689,7 @@ const I18N = {
     calNoEnv:"Can't reach the calendar here. ", calNoCap:"Calendar access isn't available. ", calNotConn:"Google Calendar isn't connected. ",
     calReauth:"Google Calendar needs you to sign in again. ", calDenied:"Calendar access was not allowed. ", calErr:"Couldn't add to the calendar. ",
     h:"{h}h {m}m", m:"{m} min", kg:"kg", repUnit:"",
-    freq:"Frequent", cardio:"Cardio", field:"Field sports", fit:"Fitness", fitLog:"Log by class length", catBack:"‹ Back", home:"Home workout", hbw:"Bodyweight", hwt:"Weights", htm:"Timed",
+    freq:"Frequent", qex:"Jump to a frequent exercise", cardio:"Cardio", field:"Field sports", fit:"Fitness", fitLog:"Log by class length", catBack:"‹ Back", home:"Home workout", hbw:"Bodyweight", hwt:"Weights", htm:"Timed",
     finishQ:"Finish this exercise?", endGymQ:"Leave the gym?", yesEnd:"Finish", padOk:"OK",
     hlHead:"Apple Health", hlAuto:"Send to Health when finished", hlGet:"Connect to Apple Health", hlSend:"Log to Health", hlQ:"Log this to Health?", hlLater:"Not now", hlAuto2:"Offer Health logging when finished", watchOwn:"I have an Apple Watch", watchOn:"I wore my Apple Watch today", watchNote:"On those days only weight is sent", obWatch:"Apple Watch", obWatchNo:"No", obWatchYes:"I have one", obHlQ:"Apple Health", obHlYes:"Connect", obHlNo:"No", obHlAdd:"Add the shortcut (once)", endHead:"Nice work", calAdd:"Add to Google Calendar", endClose:"Close", tutAgain:"How to use", prW:"🏆 New personal best! {w}kg", prWR:"🏆 New personal best! {w}kg × {r}", prR:"🏆 New personal best! {r} reps", wkNow:"This week {n}/{g} days", wkStreak:"{n}-week streak", wkDone:"Weekly goal met", goalHead:"Weekly goal", goalN:"{n}", menuHead:"My routines", menuN:"{n} exercises", menuFromToday:"＋ Save today's exercises as a routine", menuName:"Routine name", menuPh:"e.g. Chest day", menuSave:"Save", menuDel:"Delete this routine", menuSaved:"Saved “{name}”", bkFile:"Save to file", bkOpen:"Load from file", bkLast:"Last backup {d}", bkNever:"No backup yet", bkNote2:"Records live only on this phone. They are lost if you change phones or clear Safari data, so save a file now and then.", bkNudge:"No backup for 30+ days (tap to save)", bkOr:"Copy and paste instead",
     allParts:"‹ Body parts", exN:"{n} exercises", cardioDone:"Logged {name} {t}", cardioHint:"",
@@ -1403,6 +1407,7 @@ function renderEx(){
     </div>
     ${e.type==="fit"&&phase!=="work"?`<div class="lessons"><div class="lbl">${t("fitLog")}</div><div class="chips">${[...new Set([LESSON_MIN[e.id]||45,30,45,60])].sort((a,b)=>a-b).map(m=>`<button class="chip ${m===(LESSON_MIN[e.id]||45)?"on":""}" data-lesson="${m}" ${otherBusy?"disabled":""}>${m}${t("cMin")}</button>`).join("")}</div></div>`:""}
     ${otherBusy?`<div class="note">${t("busy",{name:esc(exName(exById(tm.exId)))})}</div>`:""}
+    ${(()=>{ const q=sortedExercises(x=>x.id!==e.id).filter(x=>x.n>0).slice(0,12); return q.length?`<div class="qex"><div class="lbl">${t("qex")}</div>${q.map(x=>`<button data-ex="${x.e.id}">${esc(exName(x.e))}</button>`).join("")}</div>`:""; })()}
 
     <div class="sets"><h2>${t("todayHead")}</h2>
       ${todaySets.length? todaySets.map((s,i)=>`<button class="set" data-set="${s.id}">
@@ -1855,7 +1860,7 @@ function renderSettings(){
     </div></div>
     <button class="btn" style="width:100%" data-act="tut">${t("tutAgain")}</button>
     <button class="btn danger" style="width:100%;margin-top:24px" data-act="reset">${t("resetBtn")}</button>
-    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261026-1122 · ${isJa()?"スタートで 3・2・1 のカウントダウン（タップで即スタート）":"3-2-1 countdown when you tap Start (tap to skip)"}</p>`;
+    <p class="note">${t("homeNote")}</p><p class="note" style="opacity:.6">ver 20261028-0347 · ${isJa()?"スタートで 3・2・1 のカウントダウン（タップで即スタート）":"3-2-1 countdown when you tap Start (tap to skip)"}</p>`;
 }
 
 // ---------- tick ----------
@@ -2512,7 +2517,7 @@ render();
 
 <script>
 (function(){
-  const cur = "20261026-1122";
+  const cur = "20261028-0347";
   async function checkUpdate(){
     try{
       if(window.S && S.timer && S.timer.phase==="work") return;
